@@ -931,7 +931,7 @@ PRINT_CONFIG_CLASS_DEFINE(
     ((ConfigOptionFloat, hollowing_closing_distance))
 )
 
-enum SLAMaterialSpeed { slamsSlow, slamsFast };
+enum SLAMaterialSpeed { slamsFast, slamsSlow, slamsHighViscosity };
 
 PRINT_CONFIG_CLASS_DEFINE(
     SLAMaterialConfig,
@@ -973,6 +973,7 @@ PRINT_CONFIG_CLASS_DEFINE(
     ((ConfigOptionFloat,                      gamma_correction))
     ((ConfigOptionFloat,                      fast_tilt_time))
     ((ConfigOptionFloat,                      slow_tilt_time))
+    ((ConfigOptionFloat,                      high_viscosity_tilt_time))
     ((ConfigOptionFloat,                      area_fill))
     ((ConfigOptionFloat,                      min_exposure_time))
     ((ConfigOptionFloat,                      max_exposure_time))

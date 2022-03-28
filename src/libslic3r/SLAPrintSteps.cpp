@@ -880,10 +880,12 @@ void SLAPrint::Steps::merge_slices_and_eval_stats() {
     const double area_fill = printer_config.area_fill.getFloat()*0.01;// 0.5 (50%);
     const double fast_tilt = printer_config.fast_tilt_time.getFloat();// 5.0;
     const double slow_tilt = printer_config.slow_tilt_time.getFloat();// 8.0;
+    const double hv_tilt   = printer_config.high_viscosity_tilt_time.getFloat();// 10.0;
 
     const double init_exp_time = material_config.initial_exposure_time.getFloat();
     const double exp_time      = material_config.exposure_time.getFloat();
 
+    const double layer_height = m_print->m_default_object_config.layer_height.getFloat();
     const int fade_layers_cnt = m_print->m_default_object_config.faded_layers.getInt();// 10 // [3;20]
 
     const auto width          = scaled<double>(printer_config.display_width.getFloat());
@@ -905,6 +907,60 @@ void SLAPrint::Steps::merge_slices_and_eval_stats() {
 
     sla::ccr::SpinningMutex mutex;
     using Lock = std::lock_guard<sla::ccr::SpinningMutex>;
+
+    //---------------------------------------------------------------------------
+    // This code relates to the code for FW of SL1S
+    // See https://gitlab.com/prusa3d/sl1/sla-fw/-/blob/1.7/slafw/project/project.py#L485
+
+    int layers_done{ 0 };
+    int slow_layers_done{ 0 };
+    int super_slow_layers_done{ 0 };
+
+    int self_layers_slow = 0; //?
+    
+    int time_remain_ms = 0;// sum(sum(x.times_ms) for x in self.layers[layers_done:])
+    int total_layers = printer_input.size();// len(self.layers)
+    // TODO count forced slow layers at the beginning and forced slow layers after slow layer
+    int slow_layers_ = self_layers_slow - slow_layers_done;
+    if (slow_layers_ < 0)
+        slow_layers_ = 0;
+    int fast_layers_ = total_layers - layers_done - slow_layers_ - super_slow_layers_done;
+    // If we are using superSlow profile, there should not be any other
+    int superslow_layers = total_layers - super_slow_layers_done;
+
+    // Fast and slow tilt times
+    if (hv_tilt > 0)
+        if (material_config.material_print_speed == slamsSlow)
+            time_remain_ms += (fast_layers + slow_layers) * slow_tilt * 1000;
+        else if (material_config.material_print_speed == slamsHighViscosity)
+            time_remain_ms += superslow_layers * hv_tilt * 1000;
+        else { // slamsFast
+            time_remain_ms += fast_layers * fast_tilt * 1000;
+            time_remain_ms += slow_layers * slow_tilt * 1000;
+        }
+
+    // Per layer times
+    double exposure_safe_delay_before{ 0.0 };
+    double exposure_high_viscosity_delay_before{ 0.0 };
+    double exposure_slow_move_delay_before{ 0.0 };
+    double delay_before_exposure = 0.0;// self._hw.config.delayBeforeExposure
+    if (material_config.material_print_speed == slamsSlow)
+        delay_before_exposure = exposure_safe_delay_before;
+    else if (material_config.material_print_speed == slamsHighViscosity)
+        delay_before_exposure = exposure_high_viscosity_delay_before;
+    else  // slamsFast
+        time_remain_ms += slow_layers * exposure_slow_move_delay_before * 100;
+
+    double delayAfterExposure{ 0.0 };// self._hw.config.delayAfterExposure
+    double exposure_screen_parameters__refresh_delay_ms{ 0.0 };
+    time_remain_ms += (total_layers - layers_done) * (
+        layer_height * 5/*000*/ / 1000 / 1000  // tower move
+        + delay_before_exposure * 100
+        + delayAfterExposure * 100
+        + exposure_screen_parameters__refresh_delay_ms * 5  // ~ 5x frame display wait
+        + 120  // Magical constant to compensate remaining computation delay in exposure thread
+        );
+    //---------------------------------------------------------------------------
 
     // Going to parallel:
     auto printlayerfn = [this,
