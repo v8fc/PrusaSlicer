@@ -183,6 +183,7 @@ include(CURL/CURL.cmake)
 
 include(JPEG/JPEG.cmake)
 include(TIFF/TIFF.cmake)
+include(PCRE2/PCRE2.cmake)
 include(wxWidgets/wxWidgets.cmake)
 
 set(_dep_list
