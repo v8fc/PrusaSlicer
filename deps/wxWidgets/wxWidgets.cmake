@@ -37,7 +37,6 @@ prusaslicer_add_cmake_project(wxWidgets
         -DwxUSE_LIBPNG=sys
         -DwxUSE_ZLIB=sys
         -DwxUSE_REGEX=sys
-        -DwxUSE_SVG=OFF
         -DwxUSE_LIBXPM=builtin
         -DwxUSE_LIBJPEG=sys
         -DwxUSE_LIBTIFF=sys
