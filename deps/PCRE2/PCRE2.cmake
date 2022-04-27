@@ -4,5 +4,7 @@ prusaslicer_add_cmake_project(PCRE2
     CMAKE_ARGS
         -DCMAKE_INSTALL_LIBDIR=lib # workaround on centos7
         -DPCRE2_STATIC_PIC:BOOL=ON
+        -DPCRE2_BUILD_PCRE2_8:BOOL=ON
+        -DPCRE2_BUILD_PCRE2_32:BOOL=ON
         -DPCRE2_BUILD_TESTS:BOOL=OFF
 )
