@@ -36,7 +36,7 @@ BitmapComboBox(wxWindow* parent,
 
 protected:
 
-#ifdef __APPLE__
+#if 0//def __APPLE__
 /* For PresetComboBox we use bitmaps that are created from images that are already scaled appropriately for Retina
  * (Contrary to the intuition, the `scale` argument for Bitmap's constructor doesn't mean
  * "please scale this to such and such" but rather

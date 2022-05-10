@@ -90,7 +90,7 @@ BitmapComboBox::~BitmapComboBox()
 {
 }
 
-#ifdef __APPLE__
+#if 0//def __APPLE__
 bool BitmapComboBox::OnAddBitmap(const wxBitmap& bitmap)
 {
     if (bitmap.IsOk())
