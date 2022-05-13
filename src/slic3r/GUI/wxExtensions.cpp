@@ -423,11 +423,29 @@ int mode_icon_px_size()
 #endif
 }
 
+std::string var_svg(const std::string& file_name)
+{ 
+    boost::filesystem::path path = boost::filesystem::path(Slic3r::var_dir());
+    if (Slic3r::GUI::wxGetApp().dark_mode())
+        path /= "white_";
+    path /= file_name + ".svg";
+
+    if (!boost::filesystem::exists(path.make_preferred().string()))
+        path = boost::filesystem::path(Slic3r::var_dir()) / (file_name + ".svg");
+    
+    return path.make_preferred().string();
+}
+
+wxBitmapBundle get_bmp_bundle(const std::string& bmp_name, int px_cnt/* = 16*/)
+{
+    return wxBitmapBundle::FromSVGFile(var_svg(bmp_name), wxSize(px_cnt, px_cnt));
+}
+
 //wxBitmap create_menu_bitmap(const std::string& bmp_name)
 wxBitmapBundle create_menu_bitmap(const std::string& bmp_name)
 {
  //   return create_scaled_bitmap(bmp_name, nullptr, 16, false, "", true);
-    return wxBitmapBundle::FromSVGFile(Slic3r::var(bmp_name + ".svg"), wxSize(16, 16));
+    return get_bmp_bundle(bmp_name);
 }
 
 // win is used to get a correct em_unit value
@@ -643,7 +661,7 @@ ModeButton::ModeButton( wxWindow*           parent,
                         const std::string&  icon_name/* = ""*/,
                         int                 px_cnt/* = 16*/) :
 //    ScalableButton(parent, wxID_ANY, ScalableBitmap(parent, icon_name, px_cnt), mode, wxBU_EXACTFIT)
-    ScalableButton(parent, wxID_ANY, icon_name, mode, wxDefaultSize, wxDefaultPosition, wxBU_EXACTFIT)
+    ScalableButton(parent, wxID_ANY, icon_name, mode, wxDefaultSize, wxDefaultPosition, wxBU_EXACTFIT, false, px_cnt)
 {
     Init(mode);
 }
@@ -857,7 +875,7 @@ ScalableButton::ScalableButton( wxWindow *          parent,
 
     if (!icon_name.empty()) {
 //        SetBitmap(create_scaled_bitmap(icon_name, parent, m_px_cnt));
-        SetBitmap(wxBitmapBundle::FromSVGFile(Slic3r::var(icon_name + ".svg"), wxSize(m_px_cnt, m_px_cnt)));
+        SetBitmap(get_bmp_bundle(icon_name, m_px_cnt));
         //if (m_use_default_disabled_bitmap)
         //    SetBitmapDisabled(create_scaled_bitmap(m_current_icon_name, m_parent, m_px_cnt, true));
         if (!label.empty())
@@ -902,7 +920,7 @@ bool ScalableButton::SetBitmap_(const std::string& bmp_name)
         return false;
 
 //    wxBitmap bmp = create_scaled_bitmap(m_current_icon_name, m_parent, m_px_cnt);
-    wxBitmapBundle bmp = wxBitmapBundle::FromSVGFile(Slic3r::var(m_current_icon_name + ".svg"), wxSize(16, 16));
+    wxBitmapBundle bmp = get_bmp_bundle(m_current_icon_name);
     SetBitmap(bmp);
     SetBitmapCurrent(bmp);
     SetBitmapPressed(bmp);

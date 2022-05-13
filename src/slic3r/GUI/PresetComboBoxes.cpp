@@ -107,8 +107,8 @@ PresetComboBox::PresetComboBox(wxWindow* parent, Preset::Type preset_type, const
     default: break;
     }
 
-    m_bitmapCompatible   = ScalableBitmap(this, "flag_green");
-    m_bitmapIncompatible = ScalableBitmap(this, "flag_red");
+    m_bitmapCompatible   = get_bmp_bundle("flag_green");
+    m_bitmapIncompatible = get_bmp_bundle("flag_red");
 
     // parameters for an icon's drawing
     fill_width_height();
@@ -241,8 +241,8 @@ void PresetComboBox::update(std::string select_preset_name)
 
     const std::deque<Preset>& presets = m_collection->get_presets();
 
-    std::map<wxString, std::pair<wxBitmap*, bool>>  nonsys_presets;
-    std::map<wxString, wxBitmap*>                   incomp_presets;
+    std::map<wxString, std::pair<wxBitmapBundle*, bool>>  nonsys_presets;
+    std::map<wxString, wxBitmapBundle*>                   incomp_presets;
 
     wxString selected = "";
     if (!presets.front().is_visible)
@@ -267,7 +267,7 @@ void PresetComboBox::update(std::string select_preset_name)
         }
         std::string main_icon_name = m_type == Preset::TYPE_PRINTER && preset.printer_technology() == ptSLA ? "sla_printer" : m_main_bitmap_name;
 
-        wxBitmap* bmp = get_bmp(bitmap_key, main_icon_name, "lock_closed", is_enabled, preset.is_compatible, preset.is_system || preset.is_default);
+        auto bmp = get_bmp(bitmap_key, main_icon_name, "lock_closed", is_enabled, preset.is_compatible, preset.is_system || preset.is_default);
         assert(bmp);
 
         if (!is_enabled)
@@ -279,7 +279,7 @@ void PresetComboBox::update(std::string select_preset_name)
         }
         else
         {
-            nonsys_presets.emplace(get_preset_name(preset), std::pair<wxBitmap*, bool>(bmp, is_enabled));
+            nonsys_presets.emplace(get_preset_name(preset), std::pair<wxBitmapBundle*, bool>(bmp, is_enabled));
             if (preset.name == select_preset_name || (select_preset_name.empty() && is_enabled))
                 selected = get_preset_name(preset);
         }
@@ -289,7 +289,7 @@ void PresetComboBox::update(std::string select_preset_name)
     if (!nonsys_presets.empty())
     {
         set_label_marker(Append(separator(L("User presets")), wxNullBitmap));
-        for (std::map<wxString, std::pair<wxBitmap*, bool>>::iterator it = nonsys_presets.begin(); it != nonsys_presets.end(); ++it) {
+        for (std::map<wxString, std::pair<wxBitmapBundle*, bool>>::iterator it = nonsys_presets.begin(); it != nonsys_presets.end(); ++it) {
             int item_id = Append(it->first, *it->second.first);
             bool is_enabled = it->second.second;
             if (!is_enabled)
@@ -300,7 +300,7 @@ void PresetComboBox::update(std::string select_preset_name)
     if (!incomp_presets.empty())
     {
         set_label_marker(Append(separator(L("Incompatible presets")), wxNullBitmap));
-        for (std::map<wxString, wxBitmap*>::iterator it = incomp_presets.begin(); it != incomp_presets.end(); ++it) {
+        for (std::map<wxString, wxBitmapBundle*>::iterator it = incomp_presets.begin(); it != incomp_presets.end(); ++it) {
             set_label_marker(Append(it->first, *it->second), LABEL_ITEM_DISABLED);
         }
     }
@@ -336,7 +336,6 @@ bool PresetComboBox::del_physical_printer(const wxString& note_string/* = wxEmpt
         msg += note_string + "\n";
     msg += format_wxstr(_L("Are you sure you want to delete \"%1%\" printer?"), printer_name);
 
-    //if (wxMessageDialog(this, msg, _L("Delete Physical Printer"), wxYES_NO | wxNO_DEFAULT | wxICON_QUESTION).ShowModal() != wxID_YES)
     if (MessageDialog(this, msg, _L("Delete Physical Printer"), wxYES_NO | wxNO_DEFAULT | wxICON_QUESTION).ShowModal() != wxID_YES)
         return false;
 
@@ -379,10 +378,10 @@ void PresetComboBox::msw_rescale()
     //m_bitmapCompatible.msw_rescale();
 
     // parameters for an icon's drawing
-    fill_width_height();
+//    fill_width_height();
 
     // update the control to redraw the icons
-    update();
+//    update();
 }
 
 void PresetComboBox::sys_color_changed()
@@ -395,8 +394,10 @@ void PresetComboBox::fill_width_height()
 {
     // To avoid asserts, each added bitmap to wxBitmapCombobox should be the same size, so
     // set a bitmap's height to m_bitmapCompatible->GetHeight() and norm_icon_width to m_bitmapCompatible->GetWidth()
-    icon_height     = m_bitmapCompatible.GetBmpHeight();
-    norm_icon_width = m_bitmapCompatible.GetBmpWidth();
+    icon_height     = m_bitmapCompatible.GetPreferredBitmapSizeAtScale(1.0).GetHeight();
+    norm_icon_width = m_bitmapCompatible.GetPreferredBitmapSizeAtScale(1.0).GetWidth();
+    //icon_height     = m_bitmapCompatible.GetBmpHeight();
+    //norm_icon_width = m_bitmapCompatible.GetBmpWidth();
 
     /* It's supposed that standard size of an icon is 16px*16px for 100% scaled display.
     * So set sizes for solid_colored icons used for filament preset
@@ -418,7 +419,8 @@ wxString PresetComboBox::separator(const std::string& label)
     return wxString::FromUTF8(separator_head()) + _(label) + wxString::FromUTF8(separator_tail());
 }
 
-wxBitmap* PresetComboBox::get_bmp(  std::string bitmap_key, bool wide_icons, const std::string& main_icon_name, 
+
+wxBitmapBundle* PresetComboBox::get_bmp(  std::string bitmap_key, bool wide_icons, const std::string& main_icon_name,
                                     bool is_compatible/* = true*/, bool is_system/* = false*/, bool is_single_bar/* = false*/,
                                     const std::string& filament_rgb/* = ""*/, const std::string& extruder_rgb/* = ""*/, const std::string& material_rgb/* = ""*/)
 {
@@ -434,46 +436,46 @@ wxBitmap* PresetComboBox::get_bmp(  std::string bitmap_key, bool wide_icons, con
         bitmap_key += ",dark";
     bitmap_key += material_rgb;
 
-    wxBitmap* bmp = bitmap_cache().find(bitmap_key);
-    if (bmp == nullptr) {
+    wxBitmapBundle* bmp_bndl = bitmap_cache().find_bndl(bitmap_key);
+    if (bmp_bndl == nullptr) {
         // Create the bitmap with color bars.
-        std::vector<wxBitmap> bmps;
+        std::vector<wxBitmapBundle> bmps;
         if (wide_icons)
             // Paint a red flag for incompatible presets.
-            bmps.emplace_back(is_compatible ? bitmap_cache().mkclear(norm_icon_width, icon_height) : m_bitmapIncompatible.bmp());
+            bmps.emplace_back(is_compatible ? wxBitmapBundle(bitmap_cache().mkclear(norm_icon_width, icon_height)) : m_bitmapIncompatible);
 
         if (m_type == Preset::TYPE_FILAMENT && !filament_rgb.empty())
         {
             unsigned char rgb[3];
             // Paint the color bars.
             bitmap_cache().parse_color(filament_rgb, rgb);
-            bmps.emplace_back(bitmap_cache().mksolid(is_single_bar ? wide_icon_width : norm_icon_width, icon_height, rgb, false, 1, dark_mode));
+            bmps.emplace_back(wxBitmapBundle(bitmap_cache().mksolid(is_single_bar ? wide_icon_width : norm_icon_width, icon_height, rgb, false, 1, dark_mode)));
             if (!is_single_bar) {
                 bitmap_cache().parse_color(extruder_rgb, rgb);
-                bmps.emplace_back(bitmap_cache().mksolid(thin_icon_width, icon_height, rgb, false, 1, dark_mode));
+                bmps.emplace_back(wxBitmapBundle(bitmap_cache().mksolid(thin_icon_width, icon_height, rgb, false, 1, dark_mode)));
             }
             // Paint a lock at the system presets.
-            bmps.emplace_back(bitmap_cache().mkclear(space_icon_width, icon_height));
+            bmps.emplace_back(wxBitmapBundle(bitmap_cache().mkclear(space_icon_width, icon_height)));
         }
         else
         {
             // Paint the color bars.
-            bmps.emplace_back(bitmap_cache().mkclear(thin_space_icon_width, icon_height));
+            bmps.emplace_back(wxBitmapBundle(bitmap_cache().mkclear(thin_space_icon_width, icon_height)));
             if (m_type == Preset::TYPE_SLA_MATERIAL)
-                bmps.emplace_back(create_scaled_bitmap(main_icon_name, this, 16, false, material_rgb));
+                bmps.emplace_back(*bitmap_cache().from_svg(main_icon_name, 16, 16, dark_mode, material_rgb));
             else
-                bmps.emplace_back(create_scaled_bitmap(main_icon_name));
+                bmps.emplace_back(get_bmp_bundle(main_icon_name));
             // Paint a lock at the system presets.
-            bmps.emplace_back(bitmap_cache().mkclear(wide_space_icon_width, icon_height));
+            bmps.emplace_back(wxBitmapBundle(bitmap_cache().mkclear(wide_space_icon_width, icon_height)));
         }
-        bmps.emplace_back(is_system ? create_scaled_bitmap("lock_closed") : bitmap_cache().mkclear(norm_icon_width, icon_height));
-        bmp = bitmap_cache().insert(bitmap_key, bmps);
+        bmps.emplace_back(is_system ? get_bmp_bundle("lock_closed") : wxBitmapBundle(bitmap_cache().mkclear(norm_icon_width, icon_height)));
+        bmp_bndl = bitmap_cache().insert_bndl(bitmap_key, bmps);
     }
 
-    return bmp;
+    return bmp_bndl;
 }
 
-wxBitmap* PresetComboBox::get_bmp(  std::string bitmap_key, const std::string& main_icon_name, const std::string& next_icon_name,
+wxBitmapBundle* PresetComboBox::get_bmp(  std::string bitmap_key, const std::string& main_icon_name, const std::string& next_icon_name,
                                     bool is_enabled/* = true*/, bool is_compatible/* = true*/, bool is_system/* = false*/)
 {
     bitmap_key += !is_enabled ? "_disabled" : "";
@@ -483,15 +485,15 @@ wxBitmap* PresetComboBox::get_bmp(  std::string bitmap_key, const std::string& m
     if (wxGetApp().dark_mode())
         bitmap_key += ",dark";
 
-    wxBitmap* bmp = bitmap_cache().find(bitmap_key);
+    wxBitmapBundle* bmp = bitmap_cache().find_bndl(bitmap_key);
     if (bmp == nullptr) {
         // Create the bitmap with color bars.
-        std::vector<wxBitmap> bmps;
-        bmps.emplace_back(m_type == Preset::TYPE_PRINTER ? create_scaled_bitmap(main_icon_name, this, 16, !is_enabled) : 
-                          is_compatible ? m_bitmapCompatible.bmp() : m_bitmapIncompatible.bmp());
+        std::vector<wxBitmapBundle> bmps;
+        bmps.emplace_back(m_type == Preset::TYPE_PRINTER ? get_bmp_bundle(main_icon_name) :
+                          is_compatible ? m_bitmapCompatible : m_bitmapIncompatible);
         // Paint a lock at the system presets.
-        bmps.emplace_back(is_system ? create_scaled_bitmap(next_icon_name, this, 16, !is_enabled) : bitmap_cache().mkclear(norm_icon_width, icon_height));
-        bmp = bitmap_cache().insert(bitmap_key, bmps);
+        bmps.emplace_back(is_system ? get_bmp_bundle(next_icon_name) : wxBitmapBundle(bitmap_cache().mkclear(norm_icon_width, icon_height)));
+        bmp = bitmap_cache().insert_bndl(bitmap_key, bmps);
     }
 
     return bmp;
@@ -785,7 +787,7 @@ void PlaterPresetComboBox::update()
     // and draw a red flag in front of the selected preset.
     bool wide_icons = selected_preset && !selected_preset->is_compatible;
 
-    std::map<wxString, wxBitmap*> nonsys_presets;
+    std::map<wxString, wxBitmapBundle*> nonsys_presets;
 
     wxString selected_user_preset;
     wxString tooltip;
@@ -826,7 +828,7 @@ void PlaterPresetComboBox::update()
                 material_rgb = print_config_def.get("material_colour")->get_default_value<ConfigOptionString>()->value;
         }
 
-        wxBitmap* bmp = get_bmp(bitmap_key, wide_icons, bitmap_type_name, 
+        auto bmp = get_bmp(bitmap_key, wide_icons, bitmap_type_name,
                                 preset.is_compatible, preset.is_system || preset.is_default, 
                                 single_bar, filament_rgb, extruder_rgb, material_rgb);
         assert(bmp);
@@ -852,7 +854,7 @@ void PlaterPresetComboBox::update()
     if (!nonsys_presets.empty())
     {
         set_label_marker(Append(separator(L("User presets")), wxNullBitmap));
-        for (std::map<wxString, wxBitmap*>::iterator it = nonsys_presets.begin(); it != nonsys_presets.end(); ++it) {
+        for (std::map<wxString, wxBitmapBundle*>::iterator it = nonsys_presets.begin(); it != nonsys_presets.end(); ++it) {
             Append(it->first, *it->second);
             validate_selection(it->first == selected_user_preset);
         }
@@ -871,7 +873,7 @@ void PlaterPresetComboBox::update()
                     if (!preset || !preset->is_visible)
                         continue;
                     std::string main_icon_name, bitmap_key = main_icon_name = preset->printer_technology() == ptSLA ? "sla_printer" : m_main_bitmap_name;
-                    wxBitmap* bmp = get_bmp(main_icon_name, wide_icons, main_icon_name);
+                    auto bmp = get_bmp(main_icon_name, wide_icons, main_icon_name);
                     assert(bmp);
 
                     set_label_marker(Append(from_u8(it->get_full_name(preset_name) + suffix(preset)), *bmp), LABEL_ITEM_PHYSICAL_PRINTER);
@@ -882,7 +884,7 @@ void PlaterPresetComboBox::update()
     }
 
     if (m_type == Preset::TYPE_PRINTER || m_type == Preset::TYPE_FILAMENT || m_type == Preset::TYPE_SLA_MATERIAL) {
-        wxBitmap* bmp = get_bmp("edit_preset_list", wide_icons, "edit_uni");
+        auto bmp = get_bmp("edit_preset_list", wide_icons, "edit_uni");
         assert(bmp);
 
         if (m_type == Preset::TYPE_FILAMENT)
@@ -919,7 +921,7 @@ void PlaterPresetComboBox::update()
 void PlaterPresetComboBox::msw_rescale()
 {
     PresetComboBox::msw_rescale();
-    edit_btn->msw_rescale();
+//    edit_btn->msw_rescale();
 }
 
 
@@ -984,7 +986,7 @@ void TabPresetComboBox::update()
 
     const std::deque<Preset>& presets = m_collection->get_presets();
 
-    std::map<wxString, std::pair<wxBitmap*, bool>> nonsys_presets;
+    std::map<wxString, std::pair<wxBitmapBundle*, bool>> nonsys_presets;
     wxString selected = "";
     if (!presets.front().is_visible)
         set_label_marker(Append(separator(L("System presets")), wxNullBitmap));
@@ -1014,7 +1016,7 @@ void TabPresetComboBox::update()
         }
         std::string main_icon_name = m_type == Preset::TYPE_PRINTER && preset.printer_technology() == ptSLA ? "sla_printer" : m_main_bitmap_name;
 
-        wxBitmap* bmp = get_bmp(bitmap_key, main_icon_name, "lock_closed", is_enabled, preset.is_compatible, preset.is_system || preset.is_default);
+        auto bmp = get_bmp(bitmap_key, main_icon_name, "lock_closed", is_enabled, preset.is_compatible, preset.is_system || preset.is_default);
         assert(bmp);
 
         if (preset.is_default || preset.is_system) {
@@ -1025,8 +1027,8 @@ void TabPresetComboBox::update()
         }
         else
         {
-            std::pair<wxBitmap*, bool> pair(bmp, is_enabled);
-            nonsys_presets.emplace(get_preset_name(preset), std::pair<wxBitmap*, bool>(bmp, is_enabled));
+            std::pair<wxBitmapBundle*, bool> pair(bmp, is_enabled);
+            nonsys_presets.emplace(get_preset_name(preset), std::pair<wxBitmapBundle*, bool>(bmp, is_enabled));
             if (i == idx_selected)
                 selected = get_preset_name(preset);
         }
@@ -1036,7 +1038,7 @@ void TabPresetComboBox::update()
     if (!nonsys_presets.empty())
     {
         set_label_marker(Append(separator(L("User presets")), wxNullBitmap));
-        for (std::map<wxString, std::pair<wxBitmap*, bool>>::iterator it = nonsys_presets.begin(); it != nonsys_presets.end(); ++it) {
+        for (std::map<wxString, std::pair<wxBitmapBundle*, bool>>::iterator it = nonsys_presets.begin(); it != nonsys_presets.end(); ++it) {
             int item_id = Append(it->first, *it->second.first);
             bool is_enabled = it->second.second;
             if (!is_enabled)
@@ -1059,7 +1061,7 @@ void TabPresetComboBox::update()
                         continue;
                     std::string main_icon_name = preset->printer_technology() == ptSLA ? "sla_printer" : m_main_bitmap_name;
 
-                    wxBitmap* bmp = get_bmp(main_icon_name, main_icon_name, "", true, true, false);
+                    auto bmp = get_bmp(main_icon_name, main_icon_name, "", true, true, false);
                     assert(bmp);
 
                     set_label_marker(Append(from_u8(it->get_full_name(preset_name) + suffix(preset)), *bmp), LABEL_ITEM_PHYSICAL_PRINTER);
@@ -1070,7 +1072,7 @@ void TabPresetComboBox::update()
 
         // add "Add/Remove printers" item
         std::string icon_name = "edit_uni";
-        wxBitmap* bmp = get_bmp("edit_preset_list, tab,", icon_name, "");
+        auto bmp = get_bmp("edit_preset_list, tab,", icon_name, "");
         assert(bmp);
 
         set_label_marker(Append(separator(L("Add/Remove printers")), *bmp), LABEL_ITEM_WIZARD_PRINTERS);

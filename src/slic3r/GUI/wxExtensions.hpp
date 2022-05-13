@@ -50,6 +50,9 @@ void    msw_buttons_rescale(wxDialog* dlg, const int em_unit, const std::vector<
 int     em_unit(wxWindow* win);
 int     mode_icon_px_size();
 
+std::string var_svg(const std::string& file_name);
+wxBitmapBundle get_bmp_bundle(const std::string& bmp_name, int px_cnt = 16);
+
 //wxBitmap create_menu_bitmap(const std::string& bmp_name);
 wxBitmapBundle create_menu_bitmap(const std::string& bmp_name);
 

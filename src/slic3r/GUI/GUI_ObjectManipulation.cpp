@@ -112,7 +112,7 @@ ObjectManipulation::ObjectManipulation(wxWindow* parent) :
     // Load bitmaps to be used for the mirroring buttons:
     m_mirror_bitmap_on     = ScalableBitmap(parent, "mirroring_on");
     m_mirror_bitmap_off    = ScalableBitmap(parent, "mirroring_off");
-    m_mirror_bitmap_hidden = ScalableBitmap(parent, "mirroring_transparent.png");
+    m_mirror_bitmap_hidden = ScalableBitmap(parent, "mirroring_transparent");
 
     const int border = wxOSX ? 0 : 4;
     const int em = wxGetApp().em_unit();

@@ -106,8 +106,7 @@ void MsgDialog::apply_style(long style)
     std::string icon_name = style & wxICON_WARNING        ? "exclamation" :
                             style & wxICON_INFORMATION    ? "info"        :
                             style & wxICON_QUESTION       ? "question"    : "PrusaSlicer";
-    icon_name += ".svg";
-    logo->SetBitmap(wxBitmapBundle::FromSVGFile(Slic3r::var(icon_name), wxSize(64, 64)));
+    logo->SetBitmap(get_bmp_bundle(icon_name, 64));
 #endif
 }
 
