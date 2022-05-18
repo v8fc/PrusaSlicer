@@ -90,14 +90,17 @@ BitmapComboBox::~BitmapComboBox()
 {
 }
 
-#if 0//def __APPLE__
-bool BitmapComboBox::OnAddBitmap(const wxBitmap& bitmap)
+#ifdef __APPLE__
+bool BitmapComboBox::OnAddBitmap(const wxBitmapBundle& bitmap)
 {
     if (bitmap.IsOk())
     {
         // we should use scaled! size values of bitmap
-        int width = (int)bitmap.GetScaledWidth();
-        int height = (int)bitmap.GetScaledHeight();
+        wxSize bmpDefaultSize = bitmap.GetPreferredBitmapSizeAtScale(1.0);
+        //int width = (int)bitmap.GetScaledWidth();
+        //int height = (int)bitmap.GetScaledHeight();
+        int width  = bmpDefaultSize.GetWidth();
+        int height = bmpDefaultSize.GetHeight();
 
         if (m_usedImgSize.x < 0)
         {
@@ -126,6 +129,7 @@ bool BitmapComboBox::OnAddBitmap(const wxBitmap& bitmap)
     return false;
 }
 
+#if 0
 void BitmapComboBox::OnDrawItem(wxDC& dc,
     const wxRect& rect,
     int item,
@@ -155,6 +159,7 @@ void BitmapComboBox::OnDrawItem(wxDC& dc,
 }
 #endif
 
+#endif
 
 #ifdef _WIN32
 
@@ -166,19 +171,19 @@ int BitmapComboBox::Append(const wxString& item)
     //2. But then set width to 0 value for no using of bitmap left and right spacing
     //3. Set this empty bitmap to the at list one item and BitmapCombobox will be recreated correct
 
-//    wxBitmap bitmap(1, int(1.6 * wxGetApp().em_unit() + 1));
-    wxBitmap bitmap(1, 16);
-    {
+    wxBitmapBundle bitmap = get_empty_bmp_bundle(1, 16);
+/*    wxBitmap bitmap(1, 16);
+ {
         // bitmap.SetWidth(0); is depricated now
         // so, use next code 
         bitmap.UnShare();// AllocExclusive(); 
         bitmap.GetGDIImageData()->m_width = 0;
     }
 
-    OnAddBitmap(bitmap);
+*/    OnAddBitmap(bitmap);
     const int n = wxComboBox::Append(item);
-    if (n != wxNOT_FOUND)
-        DoSetItemBitmap(n, bitmap);
+    //if (n != wxNOT_FOUND)
+    //    DoSetItemBitmap(n, bitmap);
     return n;
 }
 
@@ -269,7 +274,6 @@ void BitmapComboBox::DrawBackground_(wxDC& dc, const wxRect& rect, int WXUNUSED(
 
 void BitmapComboBox::Rescale()
 {
-    return;
     // Next workaround: To correct scaling of a BitmapCombobox
     // we need to refill control with new bitmaps
     const wxString selection = this->GetValue();

@@ -36,7 +36,7 @@ BitmapComboBox(wxWindow* parent,
 
 protected:
 
-#if 0//def __APPLE__
+#ifdef __APPLE__
 /* For PresetComboBox we use bitmaps that are created from images that are already scaled appropriately for Retina
  * (Contrary to the intuition, the `scale` argument for Bitmap's constructor doesn't mean
  * "please scale this to such and such" but rather
@@ -47,8 +47,8 @@ protected:
  * For this purpose control drawing methods and
  * control size calculation methods (virtual) are overridden.
  **/
-bool OnAddBitmap(const wxBitmap& bitmap) override;
-void OnDrawItem(wxDC& dc, const wxRect& rect, int item, int flags) const override;
+bool OnAddBitmap(const wxBitmapBundle& bitmap) override;
+//void OnDrawItem(wxDC& dc, const wxRect& rect, int item, int flags) const override;
 #endif
 
 #ifdef _WIN32

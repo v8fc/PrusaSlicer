@@ -1004,9 +1004,6 @@ void MainFrame::on_dpi_changed(const wxRect& suggested_rect)
         for (auto tab : wxGetApp().tabs_list)
             tab->msw_rescale();
 
-    for (size_t id = 0; id < m_menubar->GetMenuCount(); id++)
-        msw_rescale_menu(m_menubar->GetMenu(id));
-
     // Workarounds for correct Window rendering after rescale
 
     /* Even if Window is maximized during moving,
@@ -1041,7 +1038,7 @@ void MainFrame::on_sys_color_changed()
 #ifdef _MSW_DARK_MODE
     // update common mode sizer
     if (!wxGetApp().tabs_as_menu())
-        dynamic_cast<Notebook*>(m_tabpanel)->Rescale();
+        dynamic_cast<Notebook*>(m_tabpanel)->OnColorsChanged();
 #endif
 #endif
 
