@@ -3669,6 +3669,9 @@ void Tab::save_preset(std::string name /*= ""*/, bool detach)
 
     // update preset comboboxes in DiffPresetDlg
     wxGetApp().mainframe->diff_dialog.update_presets(m_type);
+
+    if (detach)
+        update_description_lines();
 }
 
 // Called for a currently selected preset.
