@@ -21,8 +21,8 @@ ExternalProject_Add(dep_NanoSVG
 )
 
 prusaslicer_add_cmake_project(wxWidgets
-    URL https://github.com/prusa3d/wxWidgets/archive/693b9dc2e1a73054cfff5fa40f08c26504ef3e32.zip
-    URL_HASH SHA256=68d94c99729799a549f074f763507dd91b5e632d110f7bcbbbadd95dbdf1a64c
+    URL https://github.com/prusa3d/wxWidgets/archive/bee3306695b821629bce6b3623879ae18ad63994.zip
+    URL_HASH SHA256=4680c7e880ee7906146dedd36cfc8d92152f6fe947c7e1d07ca9b3909dcebd32
     DEPENDS ${PNG_PKG} ${ZLIB_PKG} ${EXPAT_PKG} dep_TIFF dep_JPEG dep_NanoSVG
     PATCH_COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_BINARY_DIR}/NanoSVG-src 3rdparty/nanosvg 
     CMAKE_ARGS
