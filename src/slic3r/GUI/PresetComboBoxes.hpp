@@ -99,6 +99,7 @@ protected:
     // parameters for an icon's drawing
     int icon_height;
     int norm_icon_width;
+    int null_icon_width;
     int thin_icon_width;
     int wide_icon_width;
     int space_icon_width;

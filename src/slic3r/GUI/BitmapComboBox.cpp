@@ -54,17 +54,6 @@ using Slic3r::GUI::format_wxstr;
 namespace Slic3r {
 namespace GUI {
 
-/* For PresetComboBox we use bitmaps that are created from images that are already scaled appropriately for Retina
- * (Contrary to the intuition, the `scale` argument for Bitmap's constructor doesn't mean
- * "please scale this to such and such" but rather
- * "the wxImage is already sized for backing scale such and such". )
- * Unfortunately, the constructor changes the size of wxBitmap too.
- * Thus We need to use unscaled size value for bitmaps that we use
- * to avoid scaled size of control items.
- * For this purpose control drawing methods and
- * control size calculation methods (virtual) are overridden.
- **/
-
 BitmapComboBox::BitmapComboBox(wxWindow* parent,
                                 wxWindowID id/* = wxID_ANY*/,
                                 const wxString& value/* = wxEmptyString*/,
@@ -90,77 +79,6 @@ BitmapComboBox::~BitmapComboBox()
 {
 }
 
-#ifdef __APPLE__
-bool BitmapComboBox::OnAddBitmap(const wxBitmapBundle& bitmap)
-{
-    if (bitmap.IsOk())
-    {
-        // we should use scaled! size values of bitmap
-        wxSize bmpDefaultSize = bitmap.GetPreferredBitmapSizeAtScale(1.0);
-        //int width = (int)bitmap.GetScaledWidth();
-        //int height = (int)bitmap.GetScaledHeight();
-        int width  = bmpDefaultSize.GetWidth();
-        int height = bmpDefaultSize.GetHeight();
-
-        if (m_usedImgSize.x < 0)
-        {
-            // If size not yet determined, get it from this image.
-            m_usedImgSize.x = width;
-            m_usedImgSize.y = height;
-
-            // Adjust control size to vertically fit the bitmap
-            wxWindow* ctrl = GetControl();
-            ctrl->InvalidateBestSize();
-            wxSize newSz = ctrl->GetBestSize();
-            wxSize sz = ctrl->GetSize();
-            if (newSz.y > sz.y)
-                ctrl->SetSize(sz.x, newSz.y);
-            else
-                DetermineIndent();
-        }
-
-        wxCHECK_MSG(width == m_usedImgSize.x && height == m_usedImgSize.y,
-            false,
-            "you can only add images of same size");
-
-        return true;
-    }
-
-    return false;
-}
-
-#if 0
-void BitmapComboBox::OnDrawItem(wxDC& dc,
-    const wxRect& rect,
-    int item,
-    int flags) const
-{
-    const wxBitmap& bmp = *(static_cast<wxBitmap*>(m_bitmaps[item]));
-    if (bmp.IsOk())
-    {
-        // we should use scaled! size values of bitmap
-        wxCoord w = bmp.GetScaledWidth();
-        wxCoord h = bmp.GetScaledHeight();
-
-        const int imgSpacingLeft = 4;
-
-        // Draw the image centered
-        dc.DrawBitmap(bmp,
-            rect.x + (m_usedImgSize.x - w) / 2 + imgSpacingLeft,
-            rect.y + (rect.height - h) / 2,
-            true);
-    }
-
-    wxString text = GetString(item);
-    if (!text.empty())
-        dc.DrawText(text,
-            rect.x + m_imgAreaWidth + 1,
-            rect.y + (rect.height - dc.GetCharHeight()) / 2);
-}
-#endif
-
-#endif
-
 #ifdef _WIN32
 
 int BitmapComboBox::Append(const wxString& item)
@@ -172,18 +90,10 @@ int BitmapComboBox::Append(const wxString& item)
     //3. Set this empty bitmap to the at list one item and BitmapCombobox will be recreated correct
 
     wxBitmapBundle bitmap = get_empty_bmp_bundle(1, 16);
-/*    wxBitmap bitmap(1, 16);
- {
-        // bitmap.SetWidth(0); is depricated now
-        // so, use next code 
-        bitmap.UnShare();// AllocExclusive(); 
-        bitmap.GetGDIImageData()->m_width = 0;
-    }
+    OnAddBitmap(bitmap);
 
-*/    OnAddBitmap(bitmap);
     const int n = wxComboBox::Append(item);
-    //if (n != wxNOT_FOUND)
-    //    DoSetItemBitmap(n, bitmap);
+
     return n;
 }
 

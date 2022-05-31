@@ -258,7 +258,7 @@ void Tab::create_preset_tab()
 #endif
         m_mode_sizer = new ModeSizer(panel, int (0.5*em_unit(this)));
 
-    const float scale_factor = /*wxGetApp().*/em_unit(this)*0.1;// GetContentScaleFactor();
+    const float scale_factor = em_unit(this)*0.1;// GetContentScaleFactor();
     m_hsizer = new wxBoxSizer(wxHORIZONTAL);
     sizer->Add(m_hsizer, 0, wxEXPAND | wxBOTTOM, 3);
     m_hsizer->Add(m_presets_choice, 0, wxLEFT | wxRIGHT | wxTOP | wxALIGN_CENTER_VERTICAL, 3);
@@ -305,11 +305,8 @@ void Tab::create_preset_tab()
     m_treectrl = new wxTreeCtrl(panel, wxID_ANY, wxDefaultPosition, wxSize(20 * m_em_unit, -1),
         wxTR_NO_BUTTONS | wxTR_HIDE_ROOT | wxTR_SINGLE | wxTR_NO_LINES | wxBORDER_SUNKEN | wxWANTS_CHARS);
     m_left_sizer->Add(m_treectrl, 1, wxEXPAND);
-    const int img_sz = int(16 * scale_factor + 0.5f);
-    m_icons = new wxImageList(img_sz, img_sz, true, 1);
-    // Index of the last icon inserted into $self->{icons}.
+    // Index of the last icon inserted into m_treectrl
     m_icon_count = -1;
-    m_treectrl->AssignImageList(m_icons);
     m_treectrl->AddRoot("root");
     m_treectrl->SetIndent(0);
     wxGetApp().UpdateDarkUI(m_treectrl);
@@ -372,6 +369,14 @@ void Tab::create_preset_tab()
     // Initialize the DynamicPrintConfig by default keys/values.
     build();
 
+    if (!m_scaled_icons_list.empty()) {
+        // update icons for tree_ctrl
+        wxVector<wxBitmapBundle> img_bundles;
+        for (const ScalableBitmap& bmp : m_scaled_icons_list)
+            img_bundles.push_back(bmp.bmp());
+        m_treectrl->SetImages(img_bundles);
+    }
+
     // ys_FIXME: Following should not be needed, the function will be called later
     // (update_mode->update_visibility->rebuild_page_tree). This does not work, during the
     // second call of rebuild_page_tree m_treectrl->GetFirstVisibleItem(); returns zero
@@ -417,7 +422,6 @@ Slic3r::GUI::PageShp Tab::add_options_page(const wxString& title, const std::str
         if (icon_idx == -1) {
             // Add a new icon to the icon list.
             m_scaled_icons_list.push_back(ScalableBitmap(this, icon));
-            m_icons->Add(m_scaled_icons_list.back().get_bitmap());
             icon_idx = ++m_icon_count;
             m_icon_index[icon] = icon_idx;
         }
@@ -962,12 +966,6 @@ void Tab::msw_rescale()
     m_presets_choice->msw_rescale();
     m_treectrl->SetMinSize(wxSize(20 * m_em_unit, -1));
 
-    m_icons->RemoveAll();
-    m_icons = new wxImageList(m_scaled_icons_list.front().GetWidth(), m_scaled_icons_list.front().GetHeight());
-    for (ScalableBitmap& bmp : m_scaled_icons_list)
-        m_icons->Add(bmp.get_bitmap());
-    m_treectrl->AssignImageList(m_icons);
-
     // rescale options_groups
     if (m_active_page)
         m_active_page->msw_rescale();
@@ -990,14 +988,12 @@ void Tab::sys_color_changed()
     update_show_hide_incompatible_button();
 
     // update icons for tree_ctrl
-    for (ScalableBitmap& bmp : m_scaled_icons_list)
+    wxVector <wxBitmapBundle> img_bundles;
+    for (ScalableBitmap& bmp : m_scaled_icons_list) {
         bmp.sys_color_changed();
-    // recreate and set new ImageList for tree_ctrl
-    m_icons->RemoveAll();
-    m_icons = new wxImageList(m_scaled_icons_list.front().GetWidth(), m_scaled_icons_list.front().GetHeight());
-    for (ScalableBitmap& bmp : m_scaled_icons_list)
-        m_icons->Add(bmp.get_bitmap());
-    m_treectrl->AssignImageList(m_icons);
+        img_bundles.push_back(bmp.bmp());
+    }
+    m_treectrl->SetImages(img_bundles);
 
     // Colors for ui "decoration"
     update_label_colours();

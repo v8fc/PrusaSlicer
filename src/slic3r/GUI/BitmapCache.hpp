@@ -33,7 +33,7 @@ public:
 	wxBitmapBundle* 		insert_bndl(const std::string &name, const wxBitmapBundle*begin, const wxBitmapBundle*end);
 	wxBitmapBundle* 		insert_raw_rgba_bndl(const std::string &bitmap_key, unsigned width, unsigned height, const unsigned char *raw_data, const bool grayscale = false);
 
-	wxBitmap*       insert(const std::string &name, size_t width, size_t height);
+	wxBitmap*       insert(const std::string &name, size_t width, size_t height, double scale = -1.0);
 	wxBitmap* 		insert(const std::string &name, const wxBitmap &bmp);
 	wxBitmap* 		insert(const std::string &name, const wxBitmap &bmp, const wxBitmap &bmp2);
 	wxBitmap* 		insert(const std::string &name, const wxBitmap &bmp, const wxBitmap &bmp2, const wxBitmap &bmp3);

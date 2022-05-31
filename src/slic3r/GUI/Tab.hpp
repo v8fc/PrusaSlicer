@@ -173,7 +173,6 @@ protected:
 	wxBoxSizer*			m_hsizer;
 	wxBoxSizer*			m_left_sizer;
 	wxTreeCtrl*			m_treectrl;
-	wxImageList*		m_icons;
 
 	wxScrolledWindow*	m_page_view {nullptr};
 	wxBoxSizer*			m_page_sizer {nullptr};

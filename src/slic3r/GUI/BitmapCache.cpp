@@ -13,11 +13,6 @@
     #include <wx/rawbmp.h>
 #endif /* __WXGTK2__ */
 
-#if defined(__WXOSX__)
-    // We need wxOSXGetMainScreenContentScaleFactor() declaration.
-    #include "wx/osx/core/private.h"
-#endif
-
 #include "nanosvg/nanosvg.h"
 #include "nanosvg/nanosvgrast.h"
 
@@ -69,8 +64,7 @@ wxBitmapBundle* BitmapCache::insert_bndl(const std::string& name, const wxBitmap
 
     std::set<double> scales = {1.0};
 #ifdef __APPLE__
-//    std::set<double> scales = {m_scale};
-    scales.emplace(wxOSXGetMainScreenContentScaleFactor());
+    scales.emplace(m_scale);
 #else
     size_t disp_cnt = wxDisplay::GetCount();
     for (size_t disp = 0; disp < disp_cnt; ++disp)
@@ -81,19 +75,16 @@ wxBitmapBundle* BitmapCache::insert_bndl(const std::string& name, const wxBitmap
         size_t width = 0;
         size_t height = 0;
         for (const wxBitmapBundle* bmp_bndl = begin_bndl; bmp_bndl != end_bndl; ++bmp_bndl) {
-            wxSize size = bmp_bndl->GetPreferredBitmapSizeAtScale(scale);
 #ifdef __APPLE__
-            width += m_scale *size.GetWidth();
-            height = std::max<size_t>(height, m_scale *size.GetHeight());
-            //width += bmp->GetScaledWidth();
-            //height = std::max<size_t>(height, bmp->GetScaledHeight());
+            wxSize size = bmp_bndl->GetPreferredBitmapSizeAtScale(1.0);
 #else
+            wxSize size = bmp_bndl->GetPreferredBitmapSizeAtScale(scale);
+#endif
             width += size.GetWidth();
             height = std::max<size_t>(height, size.GetHeight());
-#endif
         }
 
-        std::string bitmap_key = name + float_to_string_decimal_point(scale);
+        std::string bitmap_key = name + "," +float_to_string_decimal_point(scale);
 
 #ifdef __WXGTK2__
         // Broken alpha workaround
@@ -152,7 +143,7 @@ wxBitmapBundle* BitmapCache::insert_bndl(const std::string& name, const wxBitmap
 
 #else
 
-        wxBitmap* bitmap = this->insert(bitmap_key, width, height);
+        wxBitmap* bitmap = this->insert(bitmap_key, width, height, scale);
         wxMemoryDC memDC;
         memDC.SelectObject(*bitmap);
         memDC.SetBackground(*wxTRANSPARENT_BRUSH);
@@ -224,7 +215,7 @@ wxBitmapBundle* BitmapCache::insert_bndl(const std::string& bitmap_key, const wx
     return bndl;
 }
 
-wxBitmap* BitmapCache::insert(const std::string &bitmap_key, size_t width, size_t height)
+wxBitmap* BitmapCache::insert(const std::string &bitmap_key, size_t width, size_t height, double scale/* = -1.0*/)
 {
     wxBitmap *bitmap = nullptr;
     auto      it     = m_map.find(bitmap_key);
@@ -240,7 +231,7 @@ wxBitmap* BitmapCache::insert(const std::string &bitmap_key, size_t width, size_
         // So, We need to let the Mac OS wxBitmap implementation
         // know that the image may already be scaled appropriately for Retina,
         // and thereby that it's not supposed to upscale it.
-        bitmap->CreateScaled(width, height, -1, m_scale);
+        bitmap->CreateScaled(width, height, -1, scale < 0.0 ? m_scale : scale);
 #endif
         m_map[bitmap_key] = bitmap;
     } else {
@@ -653,7 +644,7 @@ wxBitmapBundle BitmapCache::mksolid(size_t width_in, size_t height_in, unsigned 
 
     std::set<double> scales = { 1.0 };
 #ifdef __APPLE__
-    scales.emplace(wxOSXGetMainScreenContentScaleFactor());
+    scales.emplace(m_scale);
 #else
     size_t disp_cnt = wxDisplay::GetCount();
     for (size_t disp = 0; disp < disp_cnt; ++disp)
