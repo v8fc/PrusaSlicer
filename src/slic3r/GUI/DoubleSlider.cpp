@@ -578,7 +578,7 @@ void Control::draw_action_icon(wxDC& dc, const wxPoint pt_beg, const wxPoint pt_
 
     if (m_draw_mode == dmSequentialFffPrint) {
         wxBitmap disabled_add = get_bmp_bundle("colorchange_add").GetBitmapFor(this).ConvertToDisabled();
-        dc.DrawBitmap(/*create_scaled_bitmap("colorchange_add", nullptr, 16, true)*/disabled_add, x_draw, y_draw);
+        dc.DrawBitmap(disabled_add, x_draw, y_draw);
     }
     else
         dc.DrawBitmap((*icon).get_bitmap(), x_draw, y_draw);

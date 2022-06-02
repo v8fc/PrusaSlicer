@@ -445,12 +445,9 @@ wxBitmapBundle* PresetComboBox::get_bmp(  std::string bitmap_key, bool wide_icon
         {
             unsigned char rgb[3];
             // Paint the color bars.
-            bitmap_cache().parse_color(filament_rgb, rgb);
-            bmps.emplace_back(bitmap_cache().mksolid(is_single_bar ? wide_icon_width : norm_icon_width, icon_height, rgb, 1, dark_mode));
-            if (!is_single_bar) {
-                bitmap_cache().parse_color(extruder_rgb, rgb);
-                bmps.emplace_back(bitmap_cache().mksolid(thin_icon_width, icon_height, rgb, 1, dark_mode));
-            }
+            bmps.emplace_back(get_solid_bmp_bundle(is_single_bar ? wide_icon_width : norm_icon_width, icon_height, filament_rgb));
+            if (!is_single_bar)
+                bmps.emplace_back(get_solid_bmp_bundle(thin_icon_width, icon_height, extruder_rgb));
             // Paint a lock at the system presets.
             bmps.emplace_back(get_empty_bmp_bundle(space_icon_width, icon_height));
         }

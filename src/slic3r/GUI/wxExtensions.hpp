@@ -49,9 +49,9 @@ void    msw_buttons_rescale(wxDialog* dlg, const int em_unit, const std::vector<
 int     em_unit(wxWindow* win);
 int     mode_icon_px_size();
 
-std::string var_svg(const std::string& file_name);
 wxBitmapBundle get_bmp_bundle(const std::string& bmp_name, int px_cnt = 16);
 wxBitmapBundle get_empty_bmp_bundle(int width, int height);
+wxBitmapBundle get_solid_bmp_bundle(int width, int height, const std::string& color);
 
 wxBitmapBundle create_menu_bitmap(const std::string& bmp_name);
 
@@ -157,9 +157,15 @@ public:
     const std::string&  name()    const { return m_icon_name; }
     int                 px_cnt()  const { return m_px_cnt;}
 
-    wxSize              GetSize()   const { return m_bmp.GetPreferredBitmapSizeFor(m_parent); }
-    int                 GetWidth()  const { return m_bmp.GetPreferredBitmapSizeFor(m_parent).GetWidth(); }
-    int                 GetHeight() const { return m_bmp.GetPreferredBitmapSizeFor(m_parent).GetHeight(); }
+    wxSize              GetSize()   const {
+#ifdef __APPLE__
+        return m_bmp.GetDefaultSize();
+#else
+        return m_bmp.GetPreferredBitmapSizeFor(m_parent);
+#endif
+    }
+    int                 GetWidth()  const { return GetSize().GetWidth(); }
+    int                 GetHeight() const { return GetSize().GetHeight(); }
 
 private:
     wxWindow*       m_parent{ nullptr };

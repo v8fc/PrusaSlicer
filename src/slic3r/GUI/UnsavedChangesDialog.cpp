@@ -115,29 +115,21 @@ wxIcon ModelNode::get_bitmap(const wxString& color)
 wxBitmap ModelNode::get_bitmap(const wxString& color)
 #endif // __linux__
 {
-    /* It's supposed that standard size of an icon is 48px*16px for 100% scaled display.
-     * So set sizes for solid_colored icons used for filament preset
-     * and scale them in respect to em_unit value
-     */
-    const double em = em_unit(m_parent_win);
-    const int icon_width    = lround(6.4 * em);
-    const int icon_height   = lround(1.6 * em);
-
-    BitmapCache bmp_cache;
-    unsigned char rgb[3];
-    BitmapCache::parse_color(into_u8(color), rgb);
-    // there is no need to scale created solid bitmap
+    wxBitmap bmp = get_solid_bmp_bundle(64, 16, into_u8(color)).GetBitmapFor(m_parent_win);
+    if (!m_toggle)
+        bmp = bmp.ConvertToDisabled();
 #ifndef __linux__
-    return bmp_cache.mksolid(icon_width, icon_height, rgb, true);
+    return bmp;
 #else
     wxIcon icon;
-    icon.CopyFromBitmap(bmp_cache.mksolid(icon_width, icon_height, rgb, true));
+    icon.CopyFromBitmap(bmp);
     return icon;
 #endif // __linux__
 }
 
 // option node
 ModelNode::ModelNode(ModelNode* parent, const wxString& text, const wxString& old_value, const wxString& new_value) :
+    m_parent_win(parent->m_parent_win),
     m_parent(parent),
     m_old_color(old_value.StartsWith("#") ? old_value : ""),
     m_new_color(new_value.StartsWith("#") ? new_value : ""),
@@ -202,18 +194,22 @@ void ModelNode::UpdateIcons()
 {
     // update icons for the colors, if any exists
     if (!m_old_color.IsEmpty())
-        m_old_color_bmp = get_bitmap(m_toggle ? m_old_color : wxString::FromUTF8(grey.c_str()));
+        m_old_color_bmp = get_bitmap(m_old_color);
     if (!m_new_color.IsEmpty())
-        m_new_color_bmp = get_bitmap(m_toggle ? m_new_color : wxString::FromUTF8(grey.c_str()));
+        m_new_color_bmp = get_bitmap(m_new_color);
 
     // update main icon, if any exists
     if (m_icon_name.empty())
         return;
 
+    wxBitmap bmp = get_bmp_bundle(m_icon_name).GetBitmapFor(m_parent_win);
+    if (!m_toggle)
+        bmp = bmp.ConvertToDisabled();
+
 #ifdef __linux__
-    m_icon.CopyFromBitmap(create_scaled_bitmap(m_icon_name, m_parent_win, 16, !m_toggle));
+    m_icon.CopyFromBitmap(bmp);
 #else
-    m_icon = create_scaled_bitmap(m_icon_name, m_parent_win, 16, !m_toggle);
+    m_icon = bmp;
 #endif //__linux__
 }
 

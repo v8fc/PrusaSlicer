@@ -49,7 +49,7 @@ void enable_menu_item(wxUpdateUIEvent& evt, std::function<bool()> const cb_condi
     const bool enable = cb_condition();
     evt.Enable(enable);
 
-#ifdef __WXOSX__
+#if 0//def __WXOSX__
     const auto it = msw_menuitem_bitmaps.find(item->GetId());
     if (it != msw_menuitem_bitmaps.end())
     {
@@ -419,19 +419,6 @@ int mode_icon_px_size()
 #endif
 }
 
-std::string var_svg(const std::string& file_name)
-{ 
-    boost::filesystem::path path = boost::filesystem::path(Slic3r::var_dir());
-    if (Slic3r::GUI::wxGetApp().dark_mode())
-        path /= "white_";
-    path /= file_name + ".svg";
-
-    if (!boost::filesystem::exists(path.make_preferred().string()))
-        path = boost::filesystem::path(Slic3r::var_dir()) / (file_name + ".svg");
-    
-    return path.make_preferred().string();
-}
-
 wxBitmapBundle get_bmp_bundle(const std::string& bmp_name_in, int px_cnt/* = 16*/)
 {
     static Slic3r::GUI::BitmapCache cache;
@@ -454,6 +441,15 @@ wxBitmapBundle get_empty_bmp_bundle(int width, int height)
 {
     static Slic3r::GUI::BitmapCache cache;
     return cache.mkclear_bndl(width, height);
+}
+
+wxBitmapBundle get_solid_bmp_bundle(int width, int height, const std::string& color )
+{
+    static Slic3r::GUI::BitmapCache cache;
+    unsigned char rgb[3];
+    Slic3r::GUI::BitmapCache::parse_color(color, rgb);
+
+    return cache.mksolid(width, height, rgb, 1, Slic3r::GUI::wxGetApp().dark_mode());
 }
 
 wxBitmapBundle create_menu_bitmap(const std::string& bmp_name)
