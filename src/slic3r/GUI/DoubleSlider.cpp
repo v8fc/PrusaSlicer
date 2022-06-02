@@ -577,7 +577,7 @@ void Control::draw_action_icon(wxDC& dc, const wxPoint pt_beg, const wxPoint pt_
         is_horizontal() ? y_draw = pt_beg.y - m_tick_icon_dim-2 : x_draw = pt_end.x + 3;
 
     if (m_draw_mode == dmSequentialFffPrint) {
-        wxBitmap disabled_add = get_bmp_bundle("colorchange_add").GetBitmapFor(this).ConvertToDisabled();
+        wxBitmap disabled_add = get_bmp_bundle("colorchange_add")->GetBitmapFor(this).ConvertToDisabled();
         dc.DrawBitmap(disabled_add, x_draw, y_draw);
     }
     else
@@ -908,12 +908,12 @@ void Control::draw_ticks(wxDC& dc)
 
         // Draw icon for "Pause print", "Custom Gcode" or conflict tick
         if (!icon_name.empty())  {
-            wxBitmapBundle icon = get_bmp_bundle(icon_name);
+            wxBitmapBundle* icon = get_bmp_bundle(icon_name);
             wxCoord x_draw, y_draw;
             is_horizontal() ? x_draw = pos - 0.5 * m_tick_icon_dim : y_draw = pos - 0.5 * m_tick_icon_dim;
             is_horizontal() ? y_draw = mid + 22 : x_draw = mid + m_thumb_size.x + 3;
 
-            dc.DrawBitmap(icon.GetBitmapFor(this), x_draw, y_draw);
+            dc.DrawBitmap(icon->GetBitmapFor(this), x_draw, y_draw);
         }
     }
 }
@@ -1582,7 +1582,7 @@ void Control::append_change_extruder_menu_item(wxMenu* menu, bool switch_current
     if (extruders_cnt > 1) {
         std::array<int, 2> active_extruders = get_active_extruders_for_tick(m_selection == ssLower ? m_lower_value : m_higher_value);
 
-        std::vector<wxBitmap*> icons = get_extruder_color_icons(true);
+        std::vector<wxBitmapBundle*> icons = get_extruder_color_icons(true);
 
         wxMenu* change_extruder_menu = new wxMenu();
 

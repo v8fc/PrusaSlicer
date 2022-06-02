@@ -49,9 +49,9 @@ void    msw_buttons_rescale(wxDialog* dlg, const int em_unit, const std::vector<
 int     em_unit(wxWindow* win);
 int     mode_icon_px_size();
 
-wxBitmapBundle get_bmp_bundle(const std::string& bmp_name, int px_cnt = 16);
-wxBitmapBundle get_empty_bmp_bundle(int width, int height);
-wxBitmapBundle get_solid_bmp_bundle(int width, int height, const std::string& color);
+wxBitmapBundle* get_bmp_bundle(const std::string& bmp_name, int px_cnt = 16);
+wxBitmapBundle* get_empty_bmp_bundle(int width, int height);
+wxBitmapBundle* get_solid_bmp_bundle(int width, int height, const std::string& color);
 
 wxBitmapBundle create_menu_bitmap(const std::string& bmp_name);
 
@@ -60,7 +60,7 @@ wxBitmap create_scaled_bitmap(const std::string& bmp_name, wxWindow *win = nullp
     const std::string& new_color = std::string(), // color witch will used instead of orange
     const bool menu_bitmap = false);
 
-std::vector<wxBitmap*> get_extruder_color_icons(bool thin_icon = false);
+std::vector<wxBitmapBundle*> get_extruder_color_icons(bool thin_icon = false);
 
 namespace Slic3r {
 namespace GUI {

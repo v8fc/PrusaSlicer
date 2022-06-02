@@ -27,10 +27,9 @@ public:
 	const wxBitmap* find(const std::string &name) const { return const_cast<BitmapCache*>(this)->find(name); }
 
 	wxBitmapBundle*			insert_bndl(const std::string& bitmap_key, const char* data, size_t width, size_t height);
-	wxBitmapBundle* 		insert_bndl(const std::string& bitmap_key, const wxBitmap &bmp);
+	wxBitmapBundle* 		insert_bndl(const std::string& bitmap_key, const wxBitmapBundle &bmp);
 	wxBitmapBundle*			insert_bndl(const std::string& bitmap_key, const wxVector<wxBitmap>& bmps);
-	wxBitmapBundle* 		insert_bndl(const std::string &name, const std::vector<wxBitmapBundle> &bmps) { return this->insert_bndl(name, &bmps.front(), &bmps.front() + bmps.size()); }
-	wxBitmapBundle* 		insert_bndl(const std::string &name, const wxBitmapBundle*begin, const wxBitmapBundle*end);
+	wxBitmapBundle*			insert_bndl(const std::string& name, const std::vector<wxBitmapBundle*>& bmps);
 	wxBitmapBundle* 		insert_raw_rgba_bndl(const std::string &bitmap_key, unsigned width, unsigned height, const unsigned char *raw_data, const bool grayscale = false);
 
 	wxBitmap*       insert(const std::string &name, size_t width, size_t height, double scale = -1.0);
@@ -60,8 +59,8 @@ public:
 	wxBitmap 		mksolid(size_t width, size_t height, const unsigned char rgb[3], bool suppress_scaling = false, size_t border_width = 0, bool dark_mode = false) { return mksolid(width, height, rgb[0], rgb[1], rgb[2], wxALPHA_OPAQUE, suppress_scaling, border_width, dark_mode); }
 	wxBitmap 		mkclear(size_t width, size_t height) { return mksolid(width, height, 0, 0, 0, wxALPHA_TRANSPARENT, true, 0); }
 	wxBitmapBundle	mksolid(size_t width, size_t height, unsigned char r, unsigned char g, unsigned char b, unsigned char transparency, size_t border_width = 0, bool dark_mode = false);
-	wxBitmapBundle	mksolid(size_t width, size_t height, const unsigned char rgb[3], size_t border_width = 0, bool dark_mode = false) { return mksolid(width, height, rgb[0], rgb[1], rgb[2], wxALPHA_OPAQUE, border_width, dark_mode); }
-	wxBitmapBundle	mkclear_bndl(size_t width, size_t height);
+	wxBitmapBundle*	mksolid_bndl(size_t width, size_t height, const std::string& color = std::string(), size_t border_width = 0, bool dark_mode = false);
+	wxBitmapBundle* mkclear_bndl(size_t width, size_t height) { return 	mksolid_bndl(width, height); }
 
 	static bool     parse_color(const std::string& scolor, unsigned char* rgb_out);
 

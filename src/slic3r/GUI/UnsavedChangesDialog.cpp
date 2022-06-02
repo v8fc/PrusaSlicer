@@ -115,7 +115,7 @@ wxIcon ModelNode::get_bitmap(const wxString& color)
 wxBitmap ModelNode::get_bitmap(const wxString& color)
 #endif // __linux__
 {
-    wxBitmap bmp = get_solid_bmp_bundle(64, 16, into_u8(color)).GetBitmapFor(m_parent_win);
+    wxBitmap bmp = get_solid_bmp_bundle(64, 16, into_u8(color))->GetBitmapFor(m_parent_win);
     if (!m_toggle)
         bmp = bmp.ConvertToDisabled();
 #ifndef __linux__
@@ -202,7 +202,7 @@ void ModelNode::UpdateIcons()
     if (m_icon_name.empty())
         return;
 
-    wxBitmap bmp = get_bmp_bundle(m_icon_name).GetBitmapFor(m_parent_win);
+    wxBitmap bmp = get_bmp_bundle(m_icon_name)->GetBitmapFor(m_parent_win);
     if (!m_toggle)
         bmp = bmp.ConvertToDisabled();
 

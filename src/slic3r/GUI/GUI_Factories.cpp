@@ -437,12 +437,12 @@ static void create_freq_settings_popupmenu(wxMenu* menu, const bool is_object_se
 #endif
 }
 
-std::vector<wxBitmap> MenuFactory::get_volume_bitmaps()
+std::vector<wxBitmapBundle*> MenuFactory::get_volume_bitmaps()
 {
-    std::vector<wxBitmap> volume_bmps;
+    std::vector<wxBitmapBundle*> volume_bmps;
     volume_bmps.reserve(ADD_VOLUME_MENU_ITEMS.size());
     for (auto item : ADD_VOLUME_MENU_ITEMS)
-        volume_bmps.push_back(create_scaled_bitmap(item.second));
+        volume_bmps.push_back(get_bmp_bundle(item.second));
     return volume_bmps;
 }
 
@@ -767,7 +767,7 @@ void MenuFactory::append_menu_item_change_extruder(wxMenu* menu)
             return;
     }
 
-    std::vector<wxBitmap*> icons = get_extruder_color_icons(true);
+    std::vector<wxBitmapBundle*> icons = get_extruder_color_icons(true);
     wxMenu* extruder_selection_menu = new wxMenu();
     const wxString& name = sels.Count() == 1 ? names[0] : names[1];
 

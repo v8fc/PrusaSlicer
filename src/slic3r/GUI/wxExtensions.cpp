@@ -48,16 +48,6 @@ void enable_menu_item(wxUpdateUIEvent& evt, std::function<bool()> const cb_condi
 {
     const bool enable = cb_condition();
     evt.Enable(enable);
-
-#if 0//def __WXOSX__
-    const auto it = msw_menuitem_bitmaps.find(item->GetId());
-    if (it != msw_menuitem_bitmaps.end())
-    {
-        const wxBitmap& item_icon = create_scaled_bitmap(it->second, win, 16, !enable);
-        if (item_icon.IsOk())
-            item->SetBitmap(item_icon);
-    }
-#endif // __WXOSX__
 }
 
 wxMenuItem* append_menu_item(wxMenu* menu, int id, const wxString& string, const wxString& description,
@@ -419,7 +409,7 @@ int mode_icon_px_size()
 #endif
 }
 
-wxBitmapBundle get_bmp_bundle(const std::string& bmp_name_in, int px_cnt/* = 16*/)
+wxBitmapBundle* get_bmp_bundle(const std::string& bmp_name_in, int px_cnt/* = 16*/)
 {
     static Slic3r::GUI::BitmapCache cache;
 
@@ -434,27 +424,24 @@ wxBitmapBundle get_bmp_bundle(const std::string& bmp_name_in, int px_cnt/* = 16*
             // Neither SVG nor PNG has been found, raise error
             throw Slic3r::RuntimeError("Could not load bitmap: " + bmp_name);
     }
-    return *bmp;
+    return bmp;
 }
 
-wxBitmapBundle get_empty_bmp_bundle(int width, int height)
+wxBitmapBundle* get_empty_bmp_bundle(int width, int height)
 {
     static Slic3r::GUI::BitmapCache cache;
     return cache.mkclear_bndl(width, height);
 }
 
-wxBitmapBundle get_solid_bmp_bundle(int width, int height, const std::string& color )
+wxBitmapBundle* get_solid_bmp_bundle(int width, int height, const std::string& color )
 {
     static Slic3r::GUI::BitmapCache cache;
-    unsigned char rgb[3];
-    Slic3r::GUI::BitmapCache::parse_color(color, rgb);
-
-    return cache.mksolid(width, height, rgb, 1, Slic3r::GUI::wxGetApp().dark_mode());
+    return cache.mksolid_bndl(width, height, color, 1, Slic3r::GUI::wxGetApp().dark_mode());
 }
 
 wxBitmapBundle create_menu_bitmap(const std::string& bmp_name)
 {
-    return get_bmp_bundle(bmp_name);
+    return *get_bmp_bundle(bmp_name);
 }
 
 // win is used to get a correct em_unit value
@@ -495,42 +482,19 @@ wxBitmap create_scaled_bitmap(  const std::string& bmp_name_in,
     return *bmp;
 }
 
-std::vector<wxBitmap*> get_extruder_color_icons(bool thin_icon/* = false*/)
+std::vector<wxBitmapBundle*> get_extruder_color_icons(bool thin_icon/* = false*/)
 {
-    static Slic3r::GUI::BitmapCache bmp_cache;
-
     // Create the bitmap with color bars.
-    std::vector<wxBitmap*> bmps;
+    std::vector<wxBitmapBundle*> bmps;
     std::vector<std::string> colors = Slic3r::GUI::wxGetApp().plater()->get_extruder_colors_from_plater_config();
 
     if (colors.empty())
         return bmps;
 
-    unsigned char rgb[3];
-
-    /* It's supposed that standard size of an icon is 36px*16px for 100% scaled display.
-     * So set sizes for solid_colored icons used for filament preset
-     * and scale them in respect to em_unit value
-     */
-    const double em = Slic3r::GUI::wxGetApp().em_unit();
-    const int icon_width = lround((thin_icon ? 1.6 : 3.2) * em);
-    const int icon_height = lround(1.6 * em);
-
     bool dark_mode = Slic3r::GUI::wxGetApp().dark_mode();
 
     for (const std::string& color : colors)
-    {
-        std::string bitmap_key = color + "-h" + std::to_string(icon_height) + "-w" + std::to_string(icon_width);
-
-        wxBitmap* bitmap = bmp_cache.find(bitmap_key);
-        if (bitmap == nullptr) {
-            // Paint the color icon.
-            Slic3r::GUI::BitmapCache::parse_color(color, rgb);
-            // there is no neede to scale created solid bitmap
-            bitmap = bmp_cache.insert(bitmap_key, bmp_cache.mksolid(icon_width, icon_height, rgb, true, 1, dark_mode));
-        }
-        bmps.emplace_back(bitmap);
-    }
+        bmps.emplace_back(get_solid_bmp_bundle(thin_icon ? 16 : 32, 16, color));
 
     return bmps;
 }
@@ -543,7 +507,7 @@ void apply_extruder_selector(Slic3r::GUI::BitmapComboBox** ctrl,
                              wxSize size/* = wxDefaultSize*/,
                              bool use_thin_icon/* = false*/)
 {
-    std::vector<wxBitmap*> icons = get_extruder_color_icons(use_thin_icon);
+    std::vector<wxBitmapBundle*> icons = get_extruder_color_icons(use_thin_icon);
 
     if (!*ctrl) {
         *ctrl = new Slic3r::GUI::BitmapComboBox(parent, wxID_ANY, wxEmptyString, pos, size, 0, nullptr, wxCB_READONLY);
@@ -569,7 +533,7 @@ void apply_extruder_selector(Slic3r::GUI::BitmapComboBox** ctrl,
 
     int i = 0;
     wxString str = _(L("Extruder"));
-    for (wxBitmap* bmp : icons) {
+    for (wxBitmapBundle* bmp : icons) {
         if (i == 0) {
             if (!first_item.empty())
                 (*ctrl)->Append(_(first_item), *bmp);
@@ -823,13 +787,13 @@ ScalableBitmap::ScalableBitmap( wxWindow *parent,
     m_parent(parent), m_icon_name(icon_name),
     m_px_cnt(px_cnt)
 {
-    m_bmp = get_bmp_bundle(icon_name, px_cnt);
+    m_bmp = *get_bmp_bundle(icon_name, px_cnt);
     m_bitmap = m_bmp.GetBitmapFor(m_parent);
 }
 
 void ScalableBitmap::sys_color_changed()
 {
-    m_bmp = get_bmp_bundle(m_icon_name, m_px_cnt);
+    m_bmp = *get_bmp_bundle(m_icon_name, m_px_cnt);
 }
 
 // ----------------------------------------------------------------------------
@@ -853,7 +817,7 @@ ScalableButton::ScalableButton( wxWindow *          parent,
     Slic3r::GUI::wxGetApp().UpdateDarkUI(this);
 
     if (!icon_name.empty()) {
-        SetBitmap(get_bmp_bundle(icon_name, m_px_cnt));
+        SetBitmap(*get_bmp_bundle(icon_name, m_px_cnt));
         if (!label.empty())
             SetBitmapMargins(int(0.5* em_unit(parent)), 0);
     }
@@ -895,7 +859,7 @@ bool ScalableButton::SetBitmap_(const std::string& bmp_name)
     if (m_current_icon_name.empty())
         return false;
 
-    wxBitmapBundle bmp = get_bmp_bundle(m_current_icon_name, m_px_cnt);
+    wxBitmapBundle bmp = *get_bmp_bundle(m_current_icon_name, m_px_cnt);
     SetBitmap(bmp);
     SetBitmapCurrent(bmp);
     SetBitmapPressed(bmp);
@@ -923,13 +887,13 @@ void ScalableButton::sys_color_changed()
 {
     Slic3r::GUI::wxGetApp().UpdateDarkUI(this, m_has_border);
 
-    wxBitmapBundle bmp = get_bmp_bundle(m_current_icon_name, m_px_cnt);
+    wxBitmapBundle bmp = *get_bmp_bundle(m_current_icon_name, m_px_cnt);
     SetBitmap(bmp);
     SetBitmapCurrent(bmp);
     SetBitmapPressed(bmp);
     SetBitmapFocus(bmp);
     if (!m_disabled_icon_name.empty())
-        SetBitmapDisabled(get_bmp_bundle(m_disabled_icon_name, m_px_cnt));
+        SetBitmapDisabled(*get_bmp_bundle(m_disabled_icon_name, m_px_cnt));
     if (!GetLabelText().IsEmpty())
         SetBitmapMargins(int(0.5 * em_unit(m_parent)), 0);
 }

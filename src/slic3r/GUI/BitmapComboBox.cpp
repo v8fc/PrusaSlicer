@@ -89,7 +89,7 @@ int BitmapComboBox::Append(const wxString& item)
     //2. But then set width to 0 value for no using of bitmap left and right spacing
     //3. Set this empty bitmap to the at list one item and BitmapCombobox will be recreated correct
 
-    wxBitmapBundle bitmap = get_empty_bmp_bundle(1, 16);
+    wxBitmapBundle bitmap = *get_empty_bmp_bundle(1, 16);
     OnAddBitmap(bitmap);
 
     const int n = wxComboBox::Append(item);

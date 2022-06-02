@@ -58,7 +58,7 @@ static wxBitmap wxImage_to_wxBitmap_with_alpha(wxImage &&image, float scale = 1.
 #endif
 }
 
-wxBitmapBundle* BitmapCache::insert_bndl(const std::string& name, const wxBitmapBundle* begin_bndl, const wxBitmapBundle* end_bndl)
+wxBitmapBundle* BitmapCache::insert_bndl(const std::string& name, const std::vector<wxBitmapBundle*>& bmps)
 {
     wxVector<wxBitmap> bitmaps;
 
@@ -74,7 +74,7 @@ wxBitmapBundle* BitmapCache::insert_bndl(const std::string& name, const wxBitmap
     for (double scale : scales) {
         size_t width = 0;
         size_t height = 0;
-        for (const wxBitmapBundle* bmp_bndl = begin_bndl; bmp_bndl != end_bndl; ++bmp_bndl) {
+        for (const wxBitmapBundle* bmp_bndl : bmps) {
 #ifdef __APPLE__
             wxSize size = bmp_bndl->GetPreferredBitmapSizeAtScale(1.0);
 #else
@@ -149,7 +149,7 @@ wxBitmapBundle* BitmapCache::insert_bndl(const std::string& name, const wxBitmap
         memDC.SetBackground(*wxTRANSPARENT_BRUSH);
         memDC.Clear();
         size_t x = 0;
-        for (const wxBitmapBundle* bmp_bndl = begin_bndl; bmp_bndl != end_bndl; ++bmp_bndl) {
+        for (const wxBitmapBundle* bmp_bndl : bmps) {
             wxBitmap bmp = bmp_bndl->GetBitmap(bmp_bndl->GetPreferredBitmapSizeAtScale(scale));
 
             if (bmp.GetWidth() > 0)
@@ -185,7 +185,7 @@ wxBitmapBundle* BitmapCache::insert_bndl(const std::string &bitmap_key, const ch
     return bndl;
 }
 
-wxBitmapBundle* BitmapCache::insert_bndl(const std::string& bitmap_key, const wxBitmap& bmp)
+wxBitmapBundle* BitmapCache::insert_bndl(const std::string& bitmap_key, const wxBitmapBundle& bmp)
 {
     wxBitmapBundle* bndl = nullptr;
     auto it = m_bndl_map.find(bitmap_key);
@@ -694,20 +694,26 @@ wxBitmapBundle BitmapCache::mksolid(size_t width_in, size_t height_in, unsigned 
     return wxBitmapBundle::FromBitmaps(bitmaps);
 }
 
-wxBitmapBundle BitmapCache::mkclear_bndl(size_t width, size_t height)
+wxBitmapBundle* BitmapCache::mksolid_bndl(size_t width, size_t height, const std::string& color, size_t border_width, bool dark_mode)
 {
-    std::string bitmap_key = "empty-w" + std::to_string(width) + "-h" + std::to_string(height);
+    std::string bitmap_key = (color.empty() ? "empty-w" : color) + "-h" + std::to_string(height) + "-w" + std::to_string(width) + (dark_mode ? "-dm" : "");
 
     wxBitmapBundle* bndl = nullptr;
     auto it = m_bndl_map.find(bitmap_key);
     if (it == m_bndl_map.end()) {
-        bndl = new wxBitmapBundle(mksolid(width, height, 0, 0, 0, wxALPHA_TRANSPARENT, size_t(0)));
+        if (color.empty())
+            bndl = new wxBitmapBundle(mksolid(width, height, 0, 0, 0, wxALPHA_TRANSPARENT, size_t(0)));
+        else {
+            unsigned char rgb[3];
+            parse_color(color, rgb);
+            bndl = new wxBitmapBundle(mksolid(width, height, rgb[0], rgb[1], rgb[2], wxALPHA_OPAQUE, border_width, dark_mode));
+        }
         m_bndl_map[bitmap_key] = bndl;
     }
     else
-        return *it->second;
+        return it->second;
 
-    return *bndl;
+    return bndl;
 }
 
 bool BitmapCache::parse_color(const std::string& scolor, unsigned char* rgb_out)

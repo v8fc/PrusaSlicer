@@ -88,9 +88,9 @@ protected:
     static BitmapCache& bitmap_cache();
 
     // Indicator, that the preset is compatible with the selected printer.
-    wxBitmapBundle      m_bitmapCompatible;
+    wxBitmapBundle*      m_bitmapCompatible;
     // Indicator, that the preset is NOT compatible with the selected printer.
-    wxBitmapBundle      m_bitmapIncompatible;
+    wxBitmapBundle*      m_bitmapIncompatible;
 
     int m_last_selected;
     int m_em_unit;
@@ -127,6 +127,8 @@ protected:
 
     wxBitmapBundle* get_bmp(  std::string bitmap_key, const std::string& main_icon_name, const std::string& next_icon_name,
                         bool is_enabled = true, bool is_compatible = true, bool is_system = false);
+
+    wxBitmapBundle NullBitmapBndl();
 
 private:
     void fill_width_height();

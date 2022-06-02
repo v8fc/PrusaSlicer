@@ -202,7 +202,7 @@ ObjectInfo::ObjectInfo(wxWindow *parent) :
 
     init_info_label(&info_size, _L("Size"));
 
-    info_icon = new wxStaticBitmap(parent, wxID_ANY, get_bmp_bundle("info"));
+    info_icon = new wxStaticBitmap(parent, wxID_ANY, *get_bmp_bundle("info"));
     info_icon->SetToolTip(_L("For a multipart object, this value isn't accurate.\n"
                              "It doesn't take account of intersections and negative volumes."));
     auto* volume_info_sizer = new wxBoxSizer(wxHORIZONTAL);
@@ -215,7 +215,7 @@ ObjectInfo::ObjectInfo(wxWindow *parent) :
 
     info_manifold = new wxStaticText(parent, wxID_ANY, "");
     info_manifold->SetFont(wxGetApp().small_font());
-    manifold_warning_icon = new wxStaticBitmap(parent, wxID_ANY, get_bmp_bundle(m_warning_icon_name));
+    manifold_warning_icon = new wxStaticBitmap(parent, wxID_ANY, *get_bmp_bundle(m_warning_icon_name));
     auto *sizer_manifold = new wxBoxSizer(wxHORIZONTAL);
     sizer_manifold->Add(manifold_warning_icon, 0, wxLEFT, 2);
     sizer_manifold->Add(info_manifold, 0, wxLEFT, 2);
@@ -238,7 +238,7 @@ void ObjectInfo::update_warning_icon(const std::string& warning_icon_name)
 {
     if ((showing_manifold_warning_icon = !warning_icon_name.empty())) {
         m_warning_icon_name = warning_icon_name;
-        manifold_warning_icon->SetBitmap(get_bmp_bundle(m_warning_icon_name));
+        manifold_warning_icon->SetBitmap(*get_bmp_bundle(m_warning_icon_name));
     }
 }
 

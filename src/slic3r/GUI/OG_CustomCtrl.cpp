@@ -19,12 +19,12 @@ static bool is_point_in_rect(const wxPoint& pt, const wxRect& rect)
             rect.GetTop() <= pt.y && pt.y <= rect.GetBottom();
 }
 
-static wxSize get_bitmap_size(const wxBitmapBundle& bmp, wxWindow* parent)
+static wxSize get_bitmap_size(const wxBitmapBundle* bmp, wxWindow* parent)
 {
 #ifdef __APPLE__
-    return bmp.GetDefaultSize();
+    return bmp->GetDefaultSize();
 #else
-    return bmp.GetBitmapFor(parent).GetSize();
+    return bmp->GetBitmapFor(parent).GetSize();
 #endif
 }
 
@@ -645,11 +645,11 @@ wxCoord OG_CustomCtrl::CtrlLine::draw_mode_bmp(wxDC& dc, wxCoord v_pos)
     ConfigOptionMode mode = og_line.get_options()[0].opt.mode;
     const std::string& bmp_name = mode == ConfigOptionMode::comSimple   ? "mode_simple" :
                                   mode == ConfigOptionMode::comAdvanced ? "mode_advanced" : "mode_expert";
-    wxBitmapBundle bmp = get_bmp_bundle(bmp_name, wxOSX ? 10 : 12);
+    wxBitmapBundle* bmp = get_bmp_bundle(bmp_name, wxOSX ? 10 : 12);
     wxCoord y_draw = v_pos + lround((height - get_bitmap_size(bmp, ctrl).GetHeight()) / 2);
 
     if (og_line.get_options().front().opt.gui_type != ConfigOptionDef::GUIType::legend)
-        dc.DrawBitmap(bmp.GetBitmapFor(ctrl), 0, y_draw);
+        dc.DrawBitmap(bmp->GetBitmapFor(ctrl), 0, y_draw);
 
     return get_bitmap_size(bmp, ctrl).GetWidth() + ctrl->m_h_gap;
 }
@@ -713,11 +713,11 @@ wxCoord    OG_CustomCtrl::CtrlLine::draw_text(wxDC& dc, wxPoint pos, const wxStr
 
 wxPoint OG_CustomCtrl::CtrlLine::draw_blinking_bmp(wxDC& dc, wxPoint pos, bool is_blinking)
 {
-    wxBitmapBundle bmp_blinking = get_bmp_bundle(is_blinking ? "search_blink" : "empty");
+    wxBitmapBundle* bmp_blinking = get_bmp_bundle(is_blinking ? "search_blink" : "empty");
     wxCoord h_pos = pos.x;
     wxCoord v_pos = pos.y + lround((height - get_bitmap_size(bmp_blinking, ctrl).GetHeight()) / 2);
 
-    dc.DrawBitmap(bmp_blinking.GetBitmapFor(ctrl), h_pos, v_pos);
+    dc.DrawBitmap(bmp_blinking->GetBitmapFor(ctrl), h_pos, v_pos);
 
     int bmp_dim = get_bitmap_size(bmp_blinking, ctrl).GetWidth();
 
@@ -733,13 +733,13 @@ wxCoord OG_CustomCtrl::CtrlLine::draw_act_bmps(wxDC& dc, wxPoint pos, const wxBi
 
     dc.DrawBitmap(bmp_undo_to_sys.GetBitmapFor(ctrl), h_pos, v_pos);
 
-    int bmp_dim = get_bitmap_size(bmp_undo_to_sys, ctrl).GetWidth();
+    int bmp_dim = get_bitmap_size(&bmp_undo_to_sys, ctrl).GetWidth();
     rects_undo_to_sys_icon[rect_id] = wxRect(h_pos, v_pos, bmp_dim, bmp_dim);
 
     h_pos += bmp_dim + ctrl->m_h_gap;
     dc.DrawBitmap(bmp_undo.GetBitmapFor(ctrl), h_pos, v_pos);
 
-    bmp_dim = get_bitmap_size(bmp_undo, ctrl).GetWidth();
+    bmp_dim = get_bitmap_size(&bmp_undo, ctrl).GetWidth();
     rects_undo_icon[rect_id] = wxRect(h_pos, v_pos, bmp_dim, bmp_dim);
 
     h_pos += bmp_dim + ctrl->m_h_gap;

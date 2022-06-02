@@ -172,11 +172,11 @@ void GalleryDialog::on_dpi_changed(const wxRect& suggested_rect)
 
 static void add_lock(wxImage& image, wxWindow* parent_win) 
 {
-    wxBitmapBundle bmp_bndl = get_bmp_bundle("lock", 22);
+    wxBitmapBundle* bmp_bndl = get_bmp_bundle("lock", 22);
 #ifdef __APPLE__
-    wxBitmap bmp = bmp_bndl.GetBitmap(bmp_bndl.GetDefaultSize() * mac_max_scaling_factor());
+    wxBitmap bmp = bmp_bndl->GetBitmap(bmp_bndl.GetDefaultSize() * mac_max_scaling_factor());
 #else
-    wxBitmap bmp = bmp_bndl.GetBitmapFor(parent_win);
+    wxBitmap bmp = bmp_bndl->GetBitmapFor(parent_win);
 #endif
 
     wxImage lock_image = bmp.ConvertToImage();
@@ -217,11 +217,11 @@ static void add_lock(wxImage& image, wxWindow* parent_win)
 
 static void add_default_image(wxImageList* img_list, bool is_system, wxWindow* parent_win)
 {
-    wxBitmapBundle bmp_bndl = get_bmp_bundle("cog", IMG_PX_CNT);
+    wxBitmapBundle* bmp_bndl = get_bmp_bundle("cog", IMG_PX_CNT);
 #ifdef __APPLE__
-    wxBitmap bmp = bmp_bndl.GetBitmap(bmp_bndl.GetDefaultSize() * mac_max_scaling_factor());
+    wxBitmap bmp = bmp_bndl->GetBitmap(bmp_bndl.GetDefaultSize() * mac_max_scaling_factor());
 #else
-    wxBitmap bmp = bmp_bndl.GetBitmapFor(parent_win);
+    wxBitmap bmp = bmp_bndl->GetBitmapFor(parent_win);
 #endif
 
     bmp = bmp.ConvertToDisabled();
