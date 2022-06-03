@@ -45,6 +45,12 @@ static wxBitmap wxImage_to_wxBitmap_with_alpha(wxImage &&image, float scale = 1.
     wxStreamBuffer *buf = stream.GetOutputStreamBuffer();
     return wxBitmap::NewFromPNGData(buf->GetBufferStart(), buf->GetBufferSize());
 #else
+#ifdef __WIN32__
+    return wxBitmap(std::move(image));
+#else
+    return wxBitmap(std::move(image), -1, scale);
+#endif // __WIN32__
+/*
 #ifdef __APPLE__
     // This is a c-tor native to Mac OS. We need to let the Mac OS wxBitmap implementation
     // know that the image may already be scaled appropriately for Retina,
@@ -55,6 +61,7 @@ static wxBitmap wxImage_to_wxBitmap_with_alpha(wxImage &&image, float scale = 1.
 #else
     return wxBitmap(std::move(image));
 #endif
+*/
 #endif
 }
 
@@ -62,23 +69,32 @@ wxBitmapBundle* BitmapCache::insert_bndl(const std::string& name, const std::vec
 {
     wxVector<wxBitmap> bitmaps;
 
+#ifdef __linux__
+    std::set<double> scales = {1.0, 1.25, 2.0};
+#else
     std::set<double> scales = {1.0};
 #ifdef __APPLE__
     scales.emplace(m_scale);
 #else
     size_t disp_cnt = wxDisplay::GetCount();
-    for (size_t disp = 0; disp < disp_cnt; ++disp)
-        scales.emplace(wxDisplay(disp).GetScaleFactor());
+    std::cout << "name:" << name;
+    for (size_t disp = 0; disp < disp_cnt; ++disp) {
+        double sf = wxDisplay(disp).GetScaleFactor();
+        scales.emplace(sf);
+        std::cout << "\t" << sf;
+    }
+    std::cout << std::endl;
 #endif
+#endif // __linux__
 
     for (double scale : scales) {
         size_t width = 0;
         size_t height = 0;
         for (const wxBitmapBundle* bmp_bndl : bmps) {
-#ifdef __APPLE__
-            wxSize size = bmp_bndl->GetPreferredBitmapSizeAtScale(1.0);
-#else
+#ifdef __WIN32__
             wxSize size = bmp_bndl->GetPreferredBitmapSizeAtScale(scale);
+#else
+            wxSize size = bmp_bndl->GetPreferredBitmapSizeAtScale(1.0);
 #endif
             width += size.GetWidth();
             height = std::max<size_t>(height, size.GetHeight());
@@ -136,7 +152,7 @@ wxBitmapBundle* BitmapCache::insert_bndl(const std::string& name, const std::vec
                     }
                 }
             }
-            x += bmp.GetWidth();
+            x += bmp.GetScaledWidth();
         }
 
         bitmaps.push_back(* this->insert(bitmap_key, wxImage_to_wxBitmap_with_alpha(std::move(image))));
@@ -154,11 +170,11 @@ wxBitmapBundle* BitmapCache::insert_bndl(const std::string& name, const std::vec
 
             if (bmp.GetWidth() > 0)
                 memDC.DrawBitmap(bmp, x, 0, true);
-#ifdef __APPLE__
             // we should "move" with step equal to non-scaled width
-            x += bmp.GetScaledWidth();
-#else
+#ifdef __WIN32__
             x += bmp.GetWidth();
+#else
+            x += bmp.GetScaledWidth();
 #endif 
         }
         memDC.SelectObject(wxNullBitmap);
@@ -642,14 +658,22 @@ wxBitmapBundle BitmapCache::mksolid(size_t width_in, size_t height_in, unsigned 
 {
     wxVector<wxBitmap> bitmaps;
 
+#ifdef __linux__
+    std::set<double> scales = { 1,0, 1.25, 2.0 };
+#else
     std::set<double> scales = { 1.0 };
 #ifdef __APPLE__
     scales.emplace(m_scale);
 #else
     size_t disp_cnt = wxDisplay::GetCount();
-    for (size_t disp = 0; disp < disp_cnt; ++disp)
-        scales.emplace(wxDisplay(disp).GetScaleFactor());
+    for (size_t disp = 0; disp < disp_cnt; ++disp) {
+        double sf = wxDisplay(disp).GetScaleFactor();
+        scales.emplace(sf);
+        std::cout << "\t" << sf;
+    }
+    std::cout << std::endl;
 #endif
+#endif //__linux__
 
     for (double scale : scales) {
         size_t width = width_in * scale;
@@ -701,6 +725,8 @@ wxBitmapBundle* BitmapCache::mksolid_bndl(size_t width, size_t height, const std
     wxBitmapBundle* bndl = nullptr;
     auto it = m_bndl_map.find(bitmap_key);
     if (it == m_bndl_map.end()) {
+
+        std::cout << "bitmap_key:" << bitmap_key;
         if (color.empty())
             bndl = new wxBitmapBundle(mksolid(width, height, 0, 0, 0, wxALPHA_TRANSPARENT, size_t(0)));
         else {

@@ -105,10 +105,10 @@ wxMenuItem* append_submenu(wxMenu* menu, wxMenu* sub_menu, int id, const wxStrin
     wxMenuItem* item = new wxMenuItem(menu, id, string, description);
     if (!icon.empty()) {
         item->SetBitmap(*get_bmp_bundle(icon));
-//#ifdef __WXMSW__
-#ifndef __WXGTK__
+
+#ifndef __linux__
         msw_menuitem_bitmaps[id] = icon;
-#endif /* __WXMSW__ */
+#endif // no __linux__
     }
 
     item->SetSubMenu(sub_menu);
@@ -482,8 +482,6 @@ std::vector<wxBitmapBundle*> get_extruder_color_icons(bool thin_icon/* = false*/
 
     if (colors.empty())
         return bmps;
-
-    bool dark_mode = Slic3r::GUI::wxGetApp().dark_mode();
 
     for (const std::string& color : colors)
         bmps.emplace_back(get_solid_bmp_bundle(thin_icon ? 16 : 32, 16, color));

@@ -1,4 +1,4 @@
-set(_wx_git_tag v3.1.6-patched)
+set(_wx_git_tag v3.1.6-patched_tree_fix)
 
 set(_wx_toolkit "")
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -21,8 +21,8 @@ ExternalProject_Add(dep_NanoSVG
 )
 
 prusaslicer_add_cmake_project(wxWidgets
-    URL https://github.com/prusa3d/wxWidgets/archive/bee3306695b821629bce6b3623879ae18ad63994.zip
-    URL_HASH SHA256=4680c7e880ee7906146dedd36cfc8d92152f6fe947c7e1d07ca9b3909dcebd32
+    URL https://github.com/prusa3d/wxWidgets/archive/b3af5a26401adc63b47df166f1557a2ee29a5ae5.zip
+    URL_HASH SHA256=19096ee3497ac375b6e13d82844ccd75fed4f404e11195f355fbea125dd1993a
     DEPENDS ${PNG_PKG} ${ZLIB_PKG} ${EXPAT_PKG} dep_TIFF dep_JPEG dep_NanoSVG
     PATCH_COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_BINARY_DIR}/NanoSVG-src 3rdparty/nanosvg 
     CMAKE_ARGS
