@@ -21,16 +21,15 @@
 #ifndef __linux__
 // msw_menuitem_bitmaps is used for MSW and OSX
 static std::map<int, std::string> msw_menuitem_bitmaps;
-#ifdef __WXMSW__
 void sys_color_changed_menu(wxMenu* menu)
 {
 	struct update_icons {
 		static void run(wxMenuItem* item) {
 			const auto it = msw_menuitem_bitmaps.find(item->GetId());
 			if (it != msw_menuitem_bitmaps.end()) {
-				const wxBitmapBundle& item_icon = create_menu_bitmap(it->second);
-				if (item_icon.IsOk())
-					item->SetBitmap(item_icon);
+				wxBitmapBundle* item_icon = get_bmp_bundle(it->second);
+				if (item_icon->IsOk())
+					item->SetBitmap(*item_icon);
 			}
 			if (item->IsSubMenu())
 				for (wxMenuItem *sub_item : item->GetSubMenu()->GetMenuItems())
@@ -41,8 +40,7 @@ void sys_color_changed_menu(wxMenu* menu)
 	for (wxMenuItem *item : menu->GetMenuItems())
 		update_icons::run(item);
 }
-#endif /* __WXMSW__ */
-#endif /* no __WXGTK__ */
+#endif /* no __linux__ */
 
 void enable_menu_item(wxUpdateUIEvent& evt, std::function<bool()> const cb_condition, wxMenuItem* item, wxWindow* win)
 {
@@ -51,15 +49,15 @@ void enable_menu_item(wxUpdateUIEvent& evt, std::function<bool()> const cb_condi
 }
 
 wxMenuItem* append_menu_item(wxMenu* menu, int id, const wxString& string, const wxString& description,
-    std::function<void(wxCommandEvent& event)> cb, const wxBitmapBundle& icon, wxEvtHandler* event_handler,
+    std::function<void(wxCommandEvent& event)> cb, wxBitmapBundle* icon, wxEvtHandler* event_handler,
     std::function<bool()> const cb_condition, wxWindow* parent, int insert_pos/* = wxNOT_FOUND*/)
 {
     if (id == wxID_ANY)
         id = wxNewId();
 
     auto *item = new wxMenuItem(menu, id, string, description);
-    if (icon.IsOk()) {
-        item->SetBitmap(icon);
+    if (icon && icon->IsOk()) {
+        item->SetBitmap(*icon);
     }
     if (insert_pos == wxNOT_FOUND)
         menu->Append(item);
@@ -88,13 +86,12 @@ wxMenuItem* append_menu_item(wxMenu* menu, int id, const wxString& string, const
     if (id == wxID_ANY)
         id = wxNewId();
 
-    const wxBitmapBundle& bmp = !icon.empty() ? create_menu_bitmap(icon) : wxNullBitmap;   // FIXME: pass window ptr
+    wxBitmapBundle* bmp = icon.empty() ? nullptr : get_bmp_bundle(icon);
 
-//#ifdef __WXMSW__
-#ifndef __WXGTK__
-    if (bmp.IsOk())
+#ifndef __linux__
+    if (bmp && bmp->IsOk())
         msw_menuitem_bitmaps[id] = icon;
-#endif /* __WXMSW__ */
+#endif /* no __linux__ */
 
     return append_menu_item(menu, id, string, description, cb, bmp, event_handler, cb_condition, parent, insert_pos);
 }
@@ -107,7 +104,7 @@ wxMenuItem* append_submenu(wxMenu* menu, wxMenu* sub_menu, int id, const wxStrin
 
     wxMenuItem* item = new wxMenuItem(menu, id, string, description);
     if (!icon.empty()) {
-        item->SetBitmap(create_menu_bitmap(icon));    // FIXME: pass window ptr
+        item->SetBitmap(*get_bmp_bundle(icon));
 //#ifdef __WXMSW__
 #ifndef __WXGTK__
         msw_menuitem_bitmaps[id] = icon;
@@ -437,11 +434,6 @@ wxBitmapBundle* get_solid_bmp_bundle(int width, int height, const std::string& c
 {
     static Slic3r::GUI::BitmapCache cache;
     return cache.mksolid_bndl(width, height, color, 1, Slic3r::GUI::wxGetApp().dark_mode());
-}
-
-wxBitmapBundle create_menu_bitmap(const std::string& bmp_name)
-{
-    return *get_bmp_bundle(bmp_name);
 }
 
 // win is used to get a correct em_unit value

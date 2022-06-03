@@ -95,7 +95,7 @@ wxBitmapBundle* BitmapCache::insert_bndl(const std::string& name, const std::vec
         // Fill in with full transparency.
         memset(image.GetAlpha(), 0, width * height);
         size_t x = 0;
-        for (const wxBitmapBundle* bmp_bndl = begin_bndl; bmp_bndl != end_bndl; ++bmp_bndl) {
+        for (const wxBitmapBundle* bmp_bndl : bmps) {
             wxBitmap bmp = bmp_bndl->GetBitmap(bmp_bndl->GetPreferredBitmapSizeAtScale(scale));
             if (bmp.GetWidth() > 0) {
                 if (bmp.GetDepth() == 32) {

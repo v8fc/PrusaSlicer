@@ -15,14 +15,14 @@
 #include <functional>
 
 
-#ifdef __WXMSW__
+#ifndef __linux__
 void                sys_color_changed_menu(wxMenu* menu);
-#else /* __WXMSW__ */
+#else 
 inline void         sys_color_changed_menu(wxMenu* /* menu */) {}
-#endif /* __WXMSW__ */
+#endif // no __linux__
 
 wxMenuItem* append_menu_item(wxMenu* menu, int id, const wxString& string, const wxString& description,
-    std::function<void(wxCommandEvent& event)> cb, const wxBitmapBundle& icon, wxEvtHandler* event_handler = nullptr,
+    std::function<void(wxCommandEvent& event)> cb, wxBitmapBundle* icon, wxEvtHandler* event_handler = nullptr,
     std::function<bool()> const cb_condition = []() { return true;}, wxWindow* parent = nullptr, int insert_pos = wxNOT_FOUND);
 wxMenuItem* append_menu_item(wxMenu* menu, int id, const wxString& string, const wxString& description,
     std::function<void(wxCommandEvent& event)> cb, const std::string& icon = "", wxEvtHandler* event_handler = nullptr,
@@ -52,8 +52,6 @@ int     mode_icon_px_size();
 wxBitmapBundle* get_bmp_bundle(const std::string& bmp_name, int px_cnt = 16);
 wxBitmapBundle* get_empty_bmp_bundle(int width, int height);
 wxBitmapBundle* get_solid_bmp_bundle(int width, int height, const std::string& color);
-
-wxBitmapBundle create_menu_bitmap(const std::string& bmp_name);
 
 wxBitmap create_scaled_bitmap(const std::string& bmp_name, wxWindow *win = nullptr, 
     const int px_cnt = 16, const bool grayscale = false,

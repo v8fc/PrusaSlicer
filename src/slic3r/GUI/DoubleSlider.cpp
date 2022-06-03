@@ -1593,7 +1593,7 @@ void Control::append_change_extruder_menu_item(wxMenu* menu, bool switch_current
 
             if (m_mode == MultiAsSingle)
                 append_menu_item(change_extruder_menu, wxID_ANY, item_name, "",
-                    [this, i](wxCommandEvent&) { add_code_as_tick(ToolChange, i); }, *icons[i-1], menu,
+                    [this, i](wxCommandEvent&) { add_code_as_tick(ToolChange, i); }, icons[i-1], menu,
                     [is_active_extruder]() { return !is_active_extruder; }, GUI::wxGetApp().plater());
         }
 
@@ -1631,7 +1631,7 @@ void Control::append_add_color_change_menu_item(wxMenu* menu, bool switch_curren
                                    format_wxstr(_L("Switch code to Color change (%1%) for:"), gcode(ColorChange)) : 
                                    format_wxstr(_L("Add color change (%1%) for:"), gcode(ColorChange));
         wxMenuItem* add_color_change_menu_item = menu->AppendSubMenu(add_color_change_menu, menu_name, "");
-        add_color_change_menu_item->SetBitmap(create_menu_bitmap("colorchange_add_m"));
+        add_color_change_menu_item->SetBitmap(*get_bmp_bundle("colorchange_add_m"));
     }
 }
 

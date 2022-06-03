@@ -174,7 +174,7 @@ static void add_lock(wxImage& image, wxWindow* parent_win)
 {
     wxBitmapBundle* bmp_bndl = get_bmp_bundle("lock", 22);
 #ifdef __APPLE__
-    wxBitmap bmp = bmp_bndl->GetBitmap(bmp_bndl.GetDefaultSize() * mac_max_scaling_factor());
+    wxBitmap bmp = bmp_bndl->GetBitmap(bmp_bndl->GetDefaultSize() * mac_max_scaling_factor());
 #else
     wxBitmap bmp = bmp_bndl->GetBitmapFor(parent_win);
 #endif
@@ -219,7 +219,7 @@ static void add_default_image(wxImageList* img_list, bool is_system, wxWindow* p
 {
     wxBitmapBundle* bmp_bndl = get_bmp_bundle("cog", IMG_PX_CNT);
 #ifdef __APPLE__
-    wxBitmap bmp = bmp_bndl->GetBitmap(bmp_bndl.GetDefaultSize() * mac_max_scaling_factor());
+    wxBitmap bmp = bmp_bndl->GetBitmap(bmp_bndl->GetDefaultSize() * mac_max_scaling_factor());
 #else
     wxBitmap bmp = bmp_bndl->GetBitmapFor(parent_win);
 #endif

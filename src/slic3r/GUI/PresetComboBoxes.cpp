@@ -362,8 +362,8 @@ void PresetComboBox::show_all(bool show_all)
 
 void PresetComboBox::update()
 {
-    unsigned int n = this->GetSelection();
-    this->update(n == unsigned int(-1) ? "" : into_u8(this->GetString(n)));
+    int n = this->GetSelection();
+    this->update(n < 0 ? "" : into_u8(this->GetString(n)));
 }
 
 void PresetComboBox::update_from_bundle()
@@ -433,7 +433,6 @@ wxBitmapBundle* PresetComboBox::get_bmp(  std::string bitmap_key, bool wide_icon
 
         if (m_type == Preset::TYPE_FILAMENT && !filament_rgb.empty())
         {
-            unsigned char rgb[3];
             // Paint the color bars.
             bmps.emplace_back(get_solid_bmp_bundle(is_single_bar ? wide_icon_width : norm_icon_width, icon_height, filament_rgb));
             if (!is_single_bar)
