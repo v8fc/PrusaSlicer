@@ -38,7 +38,7 @@ void BitmapCache::clear()
 
 static wxBitmap wxImage_to_wxBitmap_with_alpha(wxImage &&image, float scale = 1.0f)
 {
-#if 0//def __WXGTK2__
+#ifdef __WXGTK2__
     // Broken alpha workaround
     wxMemoryOutputStream stream;
     image.SaveFile(stream, wxBITMAP_TYPE_PNG);
@@ -69,7 +69,7 @@ wxBitmapBundle* BitmapCache::insert_bndl(const std::string& name, const std::vec
 {
     wxVector<wxBitmap> bitmaps;
 
-#ifdef __linux__
+#ifdef __WXGTK3__
     std::set<double> scales = {1.0, 2.0};
 #else
     std::set<double> scales = {1.0};
@@ -102,7 +102,7 @@ wxBitmapBundle* BitmapCache::insert_bndl(const std::string& name, const std::vec
 
         std::string bitmap_key = name + "," +float_to_string_decimal_point(scale);
 
-#if 0//def __WXGTK2__
+#ifdef __WXGTK2__
         // Broken alpha workaround
         wxImage image(width, height);
         image.InitAlpha();
@@ -112,7 +112,7 @@ wxBitmapBundle* BitmapCache::insert_bndl(const std::string& name, const std::vec
         memset(image.GetAlpha(), 0, width * height);
         size_t x = 0;
         for (const wxBitmapBundle* bmp_bndl : bmps) {
-            wxBitmap bmp = bmp_bndl->GetBitmap(bmp_bndl->GetPreferredBitmapSizeAtScale(scale));
+            wxBitmap bmp = bmp_bndl->GetBitmap(bmp_bndl->GetDefaultSize());
             if (bmp.GetWidth() > 0) {
                 if (bmp.GetDepth() == 32) {
                     wxAlphaPixelData data(bmp);
@@ -657,7 +657,7 @@ wxBitmapBundle BitmapCache::mksolid(size_t width_in, size_t height_in, unsigned 
 {
     wxVector<wxBitmap> bitmaps;
 
-#ifdef __linux__
+#ifdef __WXGTK3__
     std::set<double> scales = { 1.0, 2.0 };
 #else
     std::set<double> scales = { 1.0 };

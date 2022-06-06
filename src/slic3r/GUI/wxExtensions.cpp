@@ -408,6 +408,10 @@ int mode_icon_px_size()
 
 wxBitmapBundle* get_bmp_bundle(const std::string& bmp_name_in, int px_cnt/* = 16*/)
 {
+#ifdef __WXGTK2__
+    px_cnt *= int(em_unit(nullptr) * 0.1f + 0.5f);
+#endif // __WXGTK2__
+
     static Slic3r::GUI::BitmapCache cache;
 
     std::string bmp_name = bmp_name_in;
@@ -426,12 +430,20 @@ wxBitmapBundle* get_bmp_bundle(const std::string& bmp_name_in, int px_cnt/* = 16
 
 wxBitmapBundle* get_empty_bmp_bundle(int width, int height)
 {
+#ifdef __WXGTK2__
+    width  *= int(em_unit(nullptr) * 0.1f + 0.5f);
+    height *= int(em_unit(nullptr) * 0.1f + 0.5f);
+#endif // __WXGTK2__
     static Slic3r::GUI::BitmapCache cache;
     return cache.mkclear_bndl(width, height);
 }
 
 wxBitmapBundle* get_solid_bmp_bundle(int width, int height, const std::string& color )
 {
+#ifdef __WXGTK2__
+    width  *= int(em_unit(nullptr) * 0.1f + 0.5f);
+    height *= int(em_unit(nullptr) * 0.1f + 0.5f);
+#endif // __WXGTK2__
     static Slic3r::GUI::BitmapCache cache;
     return cache.mksolid_bndl(width, height, color, 1, Slic3r::GUI::wxGetApp().dark_mode());
 }
