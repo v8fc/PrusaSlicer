@@ -406,10 +406,18 @@ int mode_icon_px_size()
 #endif
 }
 
+#ifdef __WXGTK2__
+static int scale() 
+{
+    static int scale = int(em_unit(nullptr) * 0.1f + 0.5f);
+    return scale;
+}
+#endif // __WXGTK2__
+
 wxBitmapBundle* get_bmp_bundle(const std::string& bmp_name_in, int px_cnt/* = 16*/)
 {
 #ifdef __WXGTK2__
-    px_cnt *= int(em_unit(nullptr) * 0.1f + 0.5f);
+    px_cnt *= scale();
 #endif // __WXGTK2__
 
     static Slic3r::GUI::BitmapCache cache;
@@ -430,22 +438,22 @@ wxBitmapBundle* get_bmp_bundle(const std::string& bmp_name_in, int px_cnt/* = 16
 
 wxBitmapBundle* get_empty_bmp_bundle(int width, int height)
 {
-#ifdef __WXGTK2__
-    width  *= int(em_unit(nullptr) * 0.1f + 0.5f);
-    height *= int(em_unit(nullptr) * 0.1f + 0.5f);
-#endif // __WXGTK2__
     static Slic3r::GUI::BitmapCache cache;
+#ifdef __WXGTK2__
+    return cache.mkclear_bndl(width * scale(), height * scale());
+#else
     return cache.mkclear_bndl(width, height);
+#endif // __WXGTK2__
 }
 
 wxBitmapBundle* get_solid_bmp_bundle(int width, int height, const std::string& color )
 {
-#ifdef __WXGTK2__
-    width  *= int(em_unit(nullptr) * 0.1f + 0.5f);
-    height *= int(em_unit(nullptr) * 0.1f + 0.5f);
-#endif // __WXGTK2__
     static Slic3r::GUI::BitmapCache cache;
+#ifdef __WXGTK2__
+    return cache.mksolid_bndl(width * scale(), height * scale(), color, 1, Slic3r::GUI::wxGetApp().dark_mode());
+#else
     return cache.mksolid_bndl(width, height, color, 1, Slic3r::GUI::wxGetApp().dark_mode());
+#endif // __WXGTK2__
 }
 
 // win is used to get a correct em_unit value
