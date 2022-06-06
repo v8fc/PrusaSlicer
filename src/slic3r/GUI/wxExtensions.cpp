@@ -409,8 +409,7 @@ int mode_icon_px_size()
 #ifdef __WXGTK2__
 static int scale() 
 {
-    static int scale = int(em_unit(nullptr) * 0.1f + 0.5f);
-    return scale;
+    return int(em_unit(nullptr) * 0.1f + 0.5f);
 }
 #endif // __WXGTK2__
 

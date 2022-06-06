@@ -64,10 +64,12 @@ wxBitmapBundle* BitmapCache::insert_bndl(const std::string& name, const std::vec
 {
     wxVector<wxBitmap> bitmaps;
 
-#ifdef __WXGTK3__
-    std::set<double> scales = {1.0, 2.0};
-#else
+//#ifdef __WXGTK3__
+//    std::set<double> scales = {1.0, 2.0};
+//#else
     std::set<double> scales = {1.0};
+#ifndef __linux__
+
 #ifdef __APPLE__
     scales.emplace(m_scale);
 #else
@@ -75,7 +77,8 @@ wxBitmapBundle* BitmapCache::insert_bndl(const std::string& name, const std::vec
     for (size_t disp = 0; disp < disp_cnt; ++disp)
         scales.emplace(wxDisplay(disp).GetScaleFactor());
 #endif
-#endif // __linux__
+
+#endif // !__linux__
 
     for (double scale : scales) {
         size_t width = 0;
@@ -647,10 +650,12 @@ wxBitmapBundle BitmapCache::mksolid(size_t width_in, size_t height_in, unsigned 
 {
     wxVector<wxBitmap> bitmaps;
 
-#ifdef __WXGTK3__
-    std::set<double> scales = { 1.0, 2.0 };
-#else
+//#ifdef __WXGTK3__
+//    std::set<double> scales = { 1.0, 2.0 };
+//#else
     std::set<double> scales = { 1.0 };
+#ifndef __linux__
+
 #ifdef __APPLE__
     scales.emplace(m_scale);
 #else
@@ -658,7 +663,8 @@ wxBitmapBundle BitmapCache::mksolid(size_t width_in, size_t height_in, unsigned 
     for (size_t disp = 0; disp < disp_cnt; ++disp)
         scales.emplace(wxDisplay(disp).GetScaleFactor());
 #endif
-#endif //__linux__
+
+#endif // !__linux__
 
     for (double scale : scales) {
         size_t width = width_in * scale;
