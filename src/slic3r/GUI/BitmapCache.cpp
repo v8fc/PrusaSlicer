@@ -38,7 +38,7 @@ void BitmapCache::clear()
 
 static wxBitmap wxImage_to_wxBitmap_with_alpha(wxImage &&image, float scale = 1.0f)
 {
-#ifdef __WXGTK2__
+#if 0//def __WXGTK2__
     // Broken alpha workaround
     wxMemoryOutputStream stream;
     image.SaveFile(stream, wxBITMAP_TYPE_PNG);
@@ -94,7 +94,7 @@ wxBitmapBundle* BitmapCache::insert_bndl(const std::string& name, const std::vec
 #ifdef __WIN32__
             wxSize size = bmp_bndl->GetPreferredBitmapSizeAtScale(scale);
 #else
-            wxSize size = bmp_bndl->GetPreferredBitmapSizeAtScale(1.0);
+            wxSize size = bmp_bndl->GetDefaultSize();
 #endif
             width += size.GetWidth();
             height = std::max<size_t>(height, size.GetHeight());
@@ -102,7 +102,7 @@ wxBitmapBundle* BitmapCache::insert_bndl(const std::string& name, const std::vec
 
         std::string bitmap_key = name + "," +float_to_string_decimal_point(scale);
 
-#ifdef __WXGTK2__
+#if 0//def __WXGTK2__
         // Broken alpha workaround
         wxImage image(width, height);
         image.InitAlpha();
@@ -304,7 +304,7 @@ wxBitmap* BitmapCache::insert(const std::string &bitmap_key, const wxBitmap *beg
 #endif
     }
 
-#ifdef __WXGTK2__
+#if 0//def __WXGTK2__
     // Broken alpha workaround
     wxImage image(width, height);
     image.InitAlpha();

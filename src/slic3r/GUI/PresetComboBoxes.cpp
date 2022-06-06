@@ -906,6 +906,11 @@ void PlaterPresetComboBox::update()
     if (GetMinWidth() != 20 * m_em_unit)
         SetMinSize(wxSize(20 * m_em_unit, GetSize().GetHeight()));
 #endif //__WXMSW__
+
+#ifdef __linux__
+    if (m_type == Preset::TYPE_FILAMENT || m_type == Preset::TYPE_PRINT)
+        std::cout << (m_type == Preset::TYPE_FILAMENT ? "filament" : "print") << ": Img.x = " << this->GetBitmapSize().x << ", Img.y = " << this->GetBitmapSize().y << std::endl;
+#endif //__linux__
 }
 
 void PlaterPresetComboBox::msw_rescale()
