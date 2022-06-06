@@ -70,7 +70,7 @@ wxBitmapBundle* BitmapCache::insert_bndl(const std::string& name, const std::vec
     wxVector<wxBitmap> bitmaps;
 
 #ifdef __linux__
-    std::set<double> scales = {1.0, 1.25, 2.0};
+    std::set<double> scales = {1.0, 2.0};
 #else
     std::set<double> scales = {1.0};
 #ifdef __APPLE__
@@ -506,7 +506,6 @@ wxBitmapBundle* BitmapCache::from_svg(const std::string& bitmap_name, unsigned t
     std::string bitmap_key = bitmap_name + (target_height != 0 ?
         "-h" + std::to_string(target_height) :
         "-w" + std::to_string(target_width))
-//        + (m_scale != 1.0f ? "-s" + float_to_string_decimal_point(m_scale) : "")
         + (dark_mode ? "-dm" : "")
         + new_color;
 
@@ -608,9 +607,9 @@ wxBitmap* BitmapCache::load_svg(const std::string &bitmap_name, unsigned target_
 
     return this->insert_raw_rgba(bitmap_key, width, height, data.data(), grayscale);
 }
-
+/*
 //we make scaled solid bitmaps only for the cases, when its will be used with scaled SVG icon in one output bitmap
-wxBitmap BitmapCache::mksolid(size_t width, size_t height, unsigned char r, unsigned char g, unsigned char b, unsigned char transparency, bool suppress_scaling/* = false*/, size_t border_width /*= 0*/, bool dark_mode/* = false*/)
+wxBitmap BitmapCache::mksolid(size_t width, size_t height, unsigned char r, unsigned char g, unsigned char b, unsigned char transparency, bool suppress_scaling/* = false* /, size_t border_width /*= 0* /, bool dark_mode/* = false* /)
 {
     double scale = suppress_scaling ? 1.0f : m_scale;
     width  *= scale;
@@ -652,14 +651,14 @@ wxBitmap BitmapCache::mksolid(size_t width, size_t height, unsigned char r, unsi
 
     return wxImage_to_wxBitmap_with_alpha(std::move(image), scale);
 }
-
+*/
 //we make scaled solid bitmaps only for the cases, when its will be used with scaled SVG icon in one output bitmap
 wxBitmapBundle BitmapCache::mksolid(size_t width_in, size_t height_in, unsigned char r, unsigned char g, unsigned char b, unsigned char transparency, size_t border_width /*= 0*/, bool dark_mode/* = false*/)
 {
     wxVector<wxBitmap> bitmaps;
 
 #ifdef __linux__
-    std::set<double> scales = { 1,0, 1.25, 2.0 };
+    std::set<double> scales = { 1.0, 2.0 };
 #else
     std::set<double> scales = { 1.0 };
 #ifdef __APPLE__
@@ -720,7 +719,7 @@ wxBitmapBundle BitmapCache::mksolid(size_t width_in, size_t height_in, unsigned 
 
 wxBitmapBundle* BitmapCache::mksolid_bndl(size_t width, size_t height, const std::string& color, size_t border_width, bool dark_mode)
 {
-    std::string bitmap_key = (color.empty() ? "empty-w" : color) + "-h" + std::to_string(height) + "-w" + std::to_string(width) + (dark_mode ? "-dm" : "");
+    std::string bitmap_key = (color.empty() ? "empty" : color) + "-h" + std::to_string(height) + "-w" + std::to_string(width) + (dark_mode ? "-dm" : "");
 
     wxBitmapBundle* bndl = nullptr;
     auto it = m_bndl_map.find(bitmap_key);

@@ -388,8 +388,8 @@ void PresetComboBox::sys_color_changed()
 
 void PresetComboBox::fill_width_height()
 {
-    icon_height     = m_bitmapCompatible->GetPreferredBitmapSizeAtScale(1.0).GetHeight();
-    norm_icon_width = m_bitmapCompatible->GetPreferredBitmapSizeAtScale(1.0).GetWidth();
+    icon_height     = m_bitmapCompatible->GetDefaultSize().GetHeight();
+    norm_icon_width = m_bitmapCompatible->GetDefaultSize().GetWidth();
 
     null_icon_width = 2 * norm_icon_width;
 
@@ -484,6 +484,7 @@ wxBitmapBundle* PresetComboBox::get_bmp(  std::string bitmap_key, const std::str
 
 wxBitmapBundle PresetComboBox::NullBitmapBndl()
 {
+    assert(null_icon_width > 0);
     return *get_empty_bmp_bundle(null_icon_width, icon_height);
 }
 
