@@ -64,9 +64,6 @@ wxBitmapBundle* BitmapCache::insert_bndl(const std::string& name, const std::vec
 {
     wxVector<wxBitmap> bitmaps;
 
-//#ifdef __WXGTK3__
-//    std::set<double> scales = {1.0, 2.0};
-//#else
     std::set<double> scales = {1.0};
 #ifndef __linux__
 
@@ -84,10 +81,10 @@ wxBitmapBundle* BitmapCache::insert_bndl(const std::string& name, const std::vec
         size_t width = 0;
         size_t height = 0;
         for (const wxBitmapBundle* bmp_bndl : bmps) {
-#ifdef __WIN32__
-            wxSize size = bmp_bndl->GetPreferredBitmapSizeAtScale(scale);
-#else
+#ifdef __APPLE__
             wxSize size = bmp_bndl->GetDefaultSize();
+#else
+            wxSize size = bmp_bndl->GetPreferredBitmapSizeAtScale(scale);
 #endif
             width += size.GetWidth();
             height = std::max<size_t>(height, size.GetHeight());
@@ -164,10 +161,10 @@ wxBitmapBundle* BitmapCache::insert_bndl(const std::string& name, const std::vec
             if (bmp.GetWidth() > 0)
                 memDC.DrawBitmap(bmp, x, 0, true);
             // we should "move" with step equal to non-scaled width
-#ifdef __WIN32__
-            x += bmp.GetWidth();
-#else
+#ifdef __APPLE__
             x += bmp.GetScaledWidth();
+#else
+            x += bmp.GetWidth();
 #endif 
         }
         memDC.SelectObject(wxNullBitmap);
@@ -650,9 +647,6 @@ wxBitmapBundle BitmapCache::mksolid(size_t width_in, size_t height_in, unsigned 
 {
     wxVector<wxBitmap> bitmaps;
 
-//#ifdef __WXGTK3__
-//    std::set<double> scales = { 1.0, 2.0 };
-//#else
     std::set<double> scales = { 1.0 };
 #ifndef __linux__
 
