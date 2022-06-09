@@ -3513,7 +3513,7 @@ ImVec2 ImFont::CalcTextSizeA(float size, float max_width, float wrap_width, cons
     if (remaining)
         *remaining = s;
 
-    std::cout << "CalcTextSizeA out" << std::endl;
+    std::cout << "CalcTextSizeA out" << std::endl << std::endl;
     return text_size;
 }
 

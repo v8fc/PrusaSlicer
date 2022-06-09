@@ -764,6 +764,8 @@ CODE
 // [SECTION] INCLUDES
 //-------------------------------------------------------------------------
 
+#include <iostream>
+
 #if defined(_MSC_VER) && !defined(_CRT_SECURE_NO_WARNINGS)
 #define _CRT_SECURE_NO_WARNINGS
 #endif
@@ -4523,7 +4525,11 @@ void ImGui::Render()
 // CalcTextSize("") should return ImVec2(0.0f, g.FontSize)
 ImVec2 ImGui::CalcTextSize(const char* text, const char* text_end, bool hide_text_after_double_hash, float wrap_width)
 {
+    std::cout << "CalcTextSize in" << std::endl;
+
     ImGuiContext& g = *GImGui;
+
+    std::cout << "   get ImGuiContext& g" << std::endl;
 
     const char* text_display_end;
     if (hide_text_after_double_hash)
@@ -4532,6 +4538,11 @@ ImVec2 ImGui::CalcTextSize(const char* text, const char* text_end, bool hide_tex
         text_display_end = text_end;
 
     ImFont* font = g.Font;
+    if (font)
+        std::cout << "   get font" << std::endl;
+    else
+        std::cout << "   DIDN't get font" << std::endl;
+
     const float font_size = g.FontSize;
     if (text == text_display_end)
         return ImVec2(0.0f, font_size);
@@ -4545,6 +4556,8 @@ ImVec2 ImGui::CalcTextSize(const char* text, const char* text_end, bool hide_tex
     text_size.x = IM_FLOOR(text_size.x + 0.99999f);
 
     return text_size;
+    
+    std::cout << "CalcTextSize out" << std::endl << std::endl;
 }
 
 // Find window given position, search front-to-back
