@@ -40,6 +40,7 @@ Index of this file:
 #include "misc/freetype/imgui_freetype.h"
 #endif
 
+#include <iostream>
 #include <stdio.h>      // vsnprintf, sscanf, printf
 #if !defined(alloca)
 #if defined(__GLIBC__) || defined(__sun) || defined(__APPLE__) || defined(__NEWLIB__)
@@ -3401,8 +3402,22 @@ const char* ImFont::CalcWordWrapPositionA(float scale, const char* text, const c
 
 ImVec2 ImFont::CalcTextSizeA(float size, float max_width, float wrap_width, const char* text_begin, const char* text_end, const char** remaining) const
 {
-    if (!text_end)
+    std::cout << "CalcTextSizeA in" << std::endl;
+
+    if (text_begin)
+        std::cout << " - text_begin is defined" << std::endl;
+    if (remaining)
+        std::cout << " - remaining is defined" << std::endl;
+
+    if (!text_end) {
+        std::cout << "  text_end is undef" << std::endl;
+
         text_end = text_begin + strlen(text_begin); // FIXME-OPT: Need to avoid this.
+
+        std::cout << "  text_end i scalculated" << std::endl;
+    }
+    else
+        std::cout << " - text_end is defined" << std::endl;
 
     const float line_height = size;
     const float scale = size / FontSize;
@@ -3411,6 +3426,7 @@ ImVec2 ImFont::CalcTextSizeA(float size, float max_width, float wrap_width, cons
     float line_width = 0.0f;
 
     const bool word_wrap_enabled = (wrap_width > 0.0f);
+    std::cout << "   - word_wrap_enabled is " << word_wrap_enabled << std::endl;
     const char* word_wrap_eol = NULL;
 
     const char* s = text_begin;
@@ -3421,6 +3437,7 @@ ImVec2 ImFont::CalcTextSizeA(float size, float max_width, float wrap_width, cons
             // Calculate how far we can render. Requires two passes on the string data but keeps the code simple and not intrusive for what's essentially an uncommon feature.
             if (!word_wrap_eol)
             {
+                std::cout << "        !word_wrap_eol" << std::endl;
                 word_wrap_eol = CalcWordWrapPositionA(scale, s, text_end, wrap_width - line_width);
                 if (word_wrap_eol == s) // Wrap_width is too small to fit anything. Force displaying 1 character to minimize the height discontinuity.
                     word_wrap_eol++;    // +1 may not be a character start point in UTF-8 but it's ok because we use s >= word_wrap_eol below
@@ -3428,6 +3445,7 @@ ImVec2 ImFont::CalcTextSizeA(float size, float max_width, float wrap_width, cons
 
             if (s >= word_wrap_eol)
             {
+                std::cout << "        s >= word_wrap_eol" << std::endl;
                 if (text_size.x < line_width)
                     text_size.x = line_width;
                 text_size.y += line_height;
@@ -3449,10 +3467,12 @@ ImVec2 ImFont::CalcTextSizeA(float size, float max_width, float wrap_width, cons
         unsigned int c = (unsigned int)*s;
         if (c < 0x80)
         {
+            std::cout << "        c < 0x80" << std::endl;
             s += 1;
         }
         else
         {
+            std::cout << "        c >= 0x80" << std::endl;
             s += ImTextCharFromUtf8(&c, s, text_end);
             if (c == 0) // Malformed UTF-8?
                 break;
@@ -3460,6 +3480,7 @@ ImVec2 ImFont::CalcTextSizeA(float size, float max_width, float wrap_width, cons
 
         if (c < 32)
         {
+            std::cout << "        c < 32" << std::endl;
             if (c == '\n')
             {
                 text_size.x = ImMax(text_size.x, line_width);
@@ -3469,11 +3490,13 @@ ImVec2 ImFont::CalcTextSizeA(float size, float max_width, float wrap_width, cons
             }
             if (c == '\r')
                 continue;
+            std::cout << "        c != n && r" << std::endl;
         }
 
         const float char_width = ((int)c < IndexAdvanceX.Size ? IndexAdvanceX.Data[c] : FallbackAdvanceX) * scale;
         if (line_width + char_width >= max_width)
         {
+            std::cout << "        line_width + char_width >= max_width" << std::endl;
             s = prev_s;
             break;
         }
@@ -3490,6 +3513,7 @@ ImVec2 ImFont::CalcTextSizeA(float size, float max_width, float wrap_width, cons
     if (remaining)
         *remaining = s;
 
+    std::cout << "CalcTextSizeA out" << std::endl;
     return text_size;
 }
 
