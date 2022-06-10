@@ -3391,10 +3391,24 @@ void ImGui::GetAllocatorFunctions(ImGuiMemAllocFunc* p_alloc_func, ImGuiMemFreeF
 
 ImGuiContext* ImGui::CreateContext(ImFontAtlas* shared_font_atlas)
 {
+    std::cout << "CreateContext in" << std::endl;
+
     ImGuiContext* ctx = IM_NEW(ImGuiContext)(shared_font_atlas);
+
+    std::cout << "   ctx is " << (ctx ? "valid" : "nullptr") << std::endl;
+
     if (GImGui == NULL)
         SetCurrentContext(ctx);
+
+    std::cout << "   GImGui is " << (GImGui ? "valid" : "nullptr") << std::endl;
+
     Initialize(ctx);
+
+    if (GImGui)
+        std::cout << "      after  Initialize(ctx): ImFont is " << (GImGui->Font ? "valid" : "NULL") << std::endl;
+
+    std::cout << "CreateContext out" << std::endl << std::endl;
+
     return ctx;
 }
 
@@ -4525,11 +4539,7 @@ void ImGui::Render()
 // CalcTextSize("") should return ImVec2(0.0f, g.FontSize)
 ImVec2 ImGui::CalcTextSize(const char* text, const char* text_end, bool hide_text_after_double_hash, float wrap_width)
 {
-    std::cout << "CalcTextSize in" << std::endl;
-
     ImGuiContext& g = *GImGui;
-
-    std::cout << "   get ImGuiContext& g" << std::endl;
 
     const char* text_display_end;
     if (hide_text_after_double_hash)
@@ -4538,14 +4548,15 @@ ImVec2 ImGui::CalcTextSize(const char* text, const char* text_end, bool hide_tex
         text_display_end = text_end;
 
     ImFont* font = g.Font;
-    if (font)
-        std::cout << "   get font" << std::endl;
-    else
-        std::cout << "   DIDN't get font" << std::endl;
 
     const float font_size = g.FontSize;
     if (text == text_display_end)
         return ImVec2(0.0f, font_size);
+    if (!font) {
+        std::cout << "   font_size = " << font_size << std::endl;
+        std::cout << "CalcTextSize out on null font" << std::endl << std::endl;
+        return ImVec2(0.0f, font_size);
+    }
     ImVec2 text_size = font->CalcTextSizeA(font_size, FLT_MAX, wrap_width, text, text_display_end, NULL);
 
     // Round
@@ -4556,8 +4567,6 @@ ImVec2 ImGui::CalcTextSize(const char* text, const char* text_end, bool hide_tex
     text_size.x = IM_FLOOR(text_size.x + 0.99999f);
 
     return text_size;
-    
-    std::cout << "CalcTextSize out" << std::endl << std::endl;
 }
 
 // Find window given position, search front-to-back
@@ -6528,6 +6537,10 @@ void ImGui::FocusTopMostWindowUnderOne(ImGuiWindow* under_this_window, ImGuiWind
 // Important: this alone doesn't alter current ImDrawList state. This is called by PushFont/PopFont only.
 void ImGui::SetCurrentFont(ImFont* font)
 {
+    bool null_font = GImGui->Font == nullptr;
+    if (null_font)
+        std::cout << "ImGui::SetCurrentFont() : ImFont is NULL" << std::endl;
+
     ImGuiContext& g = *GImGui;
     IM_ASSERT(font && font->IsLoaded());    // Font Atlas not created. Did you call io.Fonts->GetTexDataAsRGBA32 / GetTexDataAsAlpha8 ?
     IM_ASSERT(font->Scale > 0.0f);
@@ -6540,6 +6553,9 @@ void ImGui::SetCurrentFont(ImFont* font)
     g.DrawListSharedData.TexUvLines = atlas->TexUvLines;
     g.DrawListSharedData.Font = g.Font;
     g.DrawListSharedData.FontSize = g.FontSize;
+
+    if (null_font != (GImGui->Font == nullptr))
+        std::cout << "      After SetCurrentFont() ImFont is " << (GImGui->Font ? "valid" : "NULL") << std::endl;
 }
 
 void ImGui::PushFont(ImFont* font)

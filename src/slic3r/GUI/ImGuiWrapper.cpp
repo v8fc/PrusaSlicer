@@ -112,12 +112,16 @@ const ImVec4 ImGuiWrapper::COL_BUTTON_ACTIVE     = COL_BUTTON_HOVERED;
 
 ImGuiWrapper::ImGuiWrapper()
 {
+    std::cout << "ImGuiWrapper in" << std::endl;
+
     ImGui::CreateContext();
 
     init_input();
     init_style();
 
     ImGui::GetIO().IniFilename = nullptr;
+
+    std::cout << "ImGuiWrapper out" << std::endl << std::endl;
 }
 
 ImGuiWrapper::~ImGuiWrapper()
