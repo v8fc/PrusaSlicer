@@ -239,7 +239,7 @@ bool OpenGLManager::init_gl()
 {
     if (!m_gl_initialized) {
         std::cout << "init_gl() in" << std::endl;
-//        glewExperimental = GL_TRUE;
+        glewExperimental = GL_TRUE;
         GLenum err = glewInit();
         if (err != GLEW_OK) {
             BOOST_LOG_TRIVIAL(error) << "Unable to init glew library: " << glewGetErrorString(err);
