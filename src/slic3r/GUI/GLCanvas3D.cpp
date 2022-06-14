@@ -1630,7 +1630,7 @@ void GLCanvas3D::render()
     if (!_is_shown_on_screen() || !_set_current() || !wxGetApp().init_opengl())
         return;
 
-    std::cout << "m_gl_context is" << (void*)m_context << std::endl;
+    std::cout << "   m_gl_context is " << (void*)m_context << std::endl;
 
     if (!is_initialized() && !init())
         return;
@@ -5331,6 +5331,7 @@ bool GLCanvas3D::_init_collapse_toolbar()
 
 bool GLCanvas3D::_set_current()
 {
+    std::cout << " set context " << (void*)m_context << std::endl;
     return m_context != nullptr && m_canvas->SetCurrent(*m_context);
 }
 

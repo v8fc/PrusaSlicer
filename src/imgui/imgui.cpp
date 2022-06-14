@@ -3391,23 +3391,15 @@ void ImGui::GetAllocatorFunctions(ImGuiMemAllocFunc* p_alloc_func, ImGuiMemFreeF
 
 ImGuiContext* ImGui::CreateContext(ImFontAtlas* shared_font_atlas)
 {
-    std::cout << "CreateContext in" << std::endl;
-
     ImGuiContext* ctx = IM_NEW(ImGuiContext)(shared_font_atlas);
-
-    std::cout << "   ctx is " << (ctx ? "valid" : "nullptr") << std::endl;
 
     if (GImGui == NULL)
         SetCurrentContext(ctx);
 
-    std::cout << "   GImGui is " << (GImGui ? "valid" : "nullptr") << std::endl;
-
     Initialize(ctx);
 
     if (GImGui)
-        std::cout << "      after  Initialize(ctx): ImFont is " << (GImGui->Font ? "valid" : "NULL") << std::endl;
-
-    std::cout << "CreateContext out" << std::endl << std::endl;
+        std::cout << "      after  Initialize(ImGui ctx): ImFont is " << (void*)GImGui->Font << std::endl;
 
     return ctx;
 }
