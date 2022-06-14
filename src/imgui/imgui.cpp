@@ -4553,7 +4553,7 @@ ImVec2 ImGui::CalcTextSize(const char* text, const char* text_end, bool hide_tex
     if (text == text_display_end)
         return ImVec2(0.0f, font_size);
     if (!font) {
-        std::cout << "CalcTextSize() > font is NULL" << std::endl << std::endl;
+//        std::cout << "CalcTextSize() > font is NULL" << std::endl << std::endl;
         return ImVec2(0.0f, /*font_size*/10.0f);
     }
     ImVec2 text_size = font->CalcTextSizeA(font_size, FLT_MAX, wrap_width, text, text_display_end, NULL);
