@@ -1630,6 +1630,8 @@ void GLCanvas3D::render()
     if (!_is_shown_on_screen() || !_set_current() || !wxGetApp().init_opengl())
         return;
 
+    std::cout << "m_gl_context is" << (void*)m_context << std::endl;
+
     if (!is_initialized() && !init())
         return;
 

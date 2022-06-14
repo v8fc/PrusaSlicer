@@ -238,6 +238,8 @@ OpenGLManager::~OpenGLManager()
 bool OpenGLManager::init_gl()
 {
     if (!m_gl_initialized) {
+        std::cout << "init_gl() in" << std::endl;
+//        glewExperimental = GL_TRUE;
         GLenum err = glewInit();
         if (err != GLEW_OK) {
             BOOST_LOG_TRIVIAL(error) << "Unable to init glew library: " << glewGetErrorString(err);
@@ -287,6 +289,7 @@ bool OpenGLManager::init_gl()
 
 wxGLContext* OpenGLManager::init_glcontext(wxGLCanvas& canvas)
 {
+    std::cout << "init_glcontext() in" << std::endl;
     if (m_context == nullptr) {
         m_context = new wxGLContext(&canvas);
 
@@ -296,6 +299,7 @@ wxGLContext* OpenGLManager::init_glcontext(wxGLCanvas& canvas)
         s_os_info.minor = wxPlatformInfo::Get().GetOSMinorVersion();
         s_os_info.micro = wxPlatformInfo::Get().GetOSMicroVersion();
 #endif //__APPLE__
+        std::cout << "m_context is " << (void*)m_context << std::endl << std::endl;
     }
     return m_context;
 }
